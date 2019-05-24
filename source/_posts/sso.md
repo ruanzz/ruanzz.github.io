@@ -41,5 +41,19 @@ CAS是Yale大学开源的一个统一认证服务，CAS包括两个部分：CAS 
 
 通过对这个流程分析我们发现，用户登录了A系统之后再访问B系统就不会再出现重定向到登录页面，这样就完成了单点登录，即使A系统和B系统时不同的域，session不同享也都没关系。
 
+接下来做个CAS的DEMO
+
+先来完成cas服务端的部署,从Github上将cas的代码检出来，然后build war包，放到tomcat里边执行
+```
+git clone https://github.com/apereo/cas-overlay-template.git
+git checkout remotes/origin/5.3  # master分支是gradle构建，5.x是maven构建
+./build.sh
+
+```
+等待打包执行完毕，在target目录下有cas.war,然后把这个war包放到tomcat8上就可以了，因为cas已经采用springboot改造过了，打出来的war包最好放在tomcat8或者更高的版本之上，这样子才不会有问题的，启动完之后访问 http://localhost:8080/cas/login 就可以看到登录页面了，默认的用户名和密码为casuser/Mellon,这个写在springboot的配置文件application.properties文件中。
+
+cas服务端就部署完成了，接下来我们将cas client 和具体的应用系统结合起来
+
+
 ## JWT
 
