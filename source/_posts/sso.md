@@ -47,13 +47,100 @@ CAS是Yale大学开源的一个统一认证服务，CAS包括两个部分：CAS 
 ```
 git clone https://github.com/apereo/cas-overlay-template.git
 git checkout remotes/origin/5.3  # master分支是gradle构建，5.x是maven构建
-./build.sh
+./mvnw clean package
 
 ```
 等待打包执行完毕，在target目录下有cas.war,然后把这个war包放到tomcat8上就可以了，因为cas已经采用springboot改造过了，打出来的war包最好放在tomcat8或者更高的版本之上，这样子才不会有问题的，启动完之后访问 http://localhost:8080/cas/login 就可以看到登录页面了，默认的用户名和密码为casuser/Mellon,这个写在springboot的配置文件application.properties文件中。
 
-cas服务端就部署完成了，接下来我们将cas client 和具体的应用系统结合起来
+通常在实际项目中，我们是用https来进行访问，下面来配置https访问
+先用jdk工具生成秘钥库
+```
+keytool -genkey -alias cas-tomcat -keyalg RSA -keystore cas.keystore
+```
+```
+➜  classes keytool -genkey -alias cas-tomcat -keyalg RSA -keystore cas.keystore
+Enter keystore password:  
+Re-enter new password: 
+What is your first and last name?
+  [Unknown]:  sso.demo.com
+What is the name of your organizational unit?
+  [Unknown]:  demo.com
+What is the name of your organization?
+  [Unknown]:  demo.com
+What is the name of your City or Locality?
+  [Unknown]:  gz
+What is the name of your State or Province?
+  [Unknown]:  gd
+What is the two-letter country code for this unit?
+  [Unknown]:  cn
+Is CN=sso.demo.com, OU=demo.com, O=demo.com, L=gz, ST=gd, C=cn correct?
+  [no]:  y
 
+Enter key password for <cas-tomcat>
+	(RETURN if same as keystore password):  
+Re-enter new password:
+```
+
+导出证书
+```
+keytool -export -file cas.crt -alias cas-tomcat -keystore cas.keystore
+```
+```
+➜  classes keytool -export -file cas.crt -alias cas-tomcat -keystore cas.keystore
+
+Enter keystore password:  
+Certificate stored in file <cas.crt>
+```
+将证书导入JDK中，不然认证了跳过来就会报错，ssl建立连接错误
+```
+keytool -import -keystore ${JAVA_HOME}/jre/lib/security/cacerts -file cas.crt -alias cas-tomcat
+```
+```
+➜  classes sudo keytool -import -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/security/cacerts -file cas.crt -alias cas-tomcat
+
+Enter keystore password:  
+Re-enter new password: 
+Owner: CN=sso.demo.com, OU=demo.com, O=demo.com, L=gz, ST=gd, C=cn
+Issuer: CN=sso.demo.com, OU=demo.com, O=demo.com, L=gz, ST=gd, C=cn
+Serial number: 5890e418
+Valid from: Sun May 26 11:41:41 CST 2019 until: Sat Aug 24 11:41:41 CST 2019
+Certificate fingerprints:
+	 MD5:  69:69:38:A9:52:03:D2:3D:DA:28:03:CD:53:59:48:23
+	 SHA1: F2:9A:55:04:E8:A2:E6:4C:C2:85:8D:EA:9A:47:E6:27:C1:DC:41:B2
+	 SHA256: 1B:25:A6:B9:F9:36:AD:E7:CD:28:2E:57:D8:30:8C:8A:9E:6C:07:CB:03:70:78:5E:AE:9C:AB:72:27:0A:13:B3
+	 Signature algorithm name: SHA256withRSA
+	 Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 93 1B 15 7E 7D 26 A3 51   35 ED 51 30 E4 EA 52 77  .....&.Q5.Q0..Rw
+0010: 19 9C 93 C1                                        ....
+]
+]
+
+Trust this certificate? [no]:  y
+Certificate was added to keystore
+```
+
+接下来配置tomcat的server.xml
+```
+ <Connector port="443" protocol="org.apache.coyote.http11.Http11Protocol"
+    maxThreads="150" SSLEnabled="true" scheme="https" secure="true"
+    clientAuth="false" sslProtocol="TLS" keystoreFile="/Users/***/apache-tomcat-8.5.41/webapps/cas/WEB-INF/classes/cas.keystore" keystorePass="123456"  />
+```
+配置域名映射`127.0.0.1  sso.demo.com`,这样子就可以通过https://sso.demo.com/cas 来进行访问了。
+
+cas服务端就部署完成了，接下来我们将Cas Client和具体的应用系统结合起来。
+
+具体代码见Github仓库中的cas模块，启动CasApplication类。
+<div class="github-widget" data-repo="ruanzz/sso"></div>
+cas模块是一个SpringBoot应用，跑起来之后访问https://localhost:8099/test 就会自动跳转到https://sso.demo.com/cas/login 认证过之后会重定向回来访问https://localhost:8099/test
+
+到这里CAS基本认证流程就OK了。
 
 ## JWT
+TODO
 
