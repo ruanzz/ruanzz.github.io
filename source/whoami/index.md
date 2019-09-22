@@ -23,7 +23,7 @@ toc: true
 <div class="github-widget" data-repo="ruanzz/ruanzz.github.io"></div>
 
 #### SpringCloud脚手架
-<div class="github-widget" data-repo="ruanzz/SpringCloud"></div>
+ <div class="github-widget" data-repo="ruanzz/SpringCloud"></div>
 
 
 
