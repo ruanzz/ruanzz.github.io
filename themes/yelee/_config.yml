@@ -14,10 +14,10 @@ menu:
   关于我: /whoami/
 
 # Link to your avatar | 填写头像地址
-avatar: /asset/img/Wellington.jpg
+avatar: /asset/img/favicon.jpg
 
 # Small icon of Your site | 站点小图标地址
-favicon: /favicon.png
+favicon: /asset/img/favicon.jpg
 
 # Internationalization | 主题语言
 ## Change Language in SITE's _config.yml | 在站点配置中切换语言
