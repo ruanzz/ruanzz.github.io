@@ -31,6 +31,7 @@ a.prev:hover {
     justify-content: space-between;
     background-color: $bg;
     border: $bordr solid 2px;
+    max-width: 95%;
     a {
         color: $a;
     }
