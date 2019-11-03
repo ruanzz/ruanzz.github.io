@@ -1366,6 +1366,102 @@ HTTP响应报文结构：
 
 > 1.常见的排序算法
 
+【冒泡排序】
+    ```Java
+        public void bubbleSort(int[] arr){
+            for(int i = 0; i < arr.length - 1; i++){
+                for(int j = 0; j < arr.length -i-1; j++){
+                    if(arr[j] > arr[j+1]){
+                        swap(j,j+1);
+                    }
+                }
+            }
+        }
+    ```
+ 
+【快速排序】
+    ```Java
+    private static void quickSort(int[] arr, int start, int end) {
+
+        // 递归终止条件
+        if (start >= end) {
+        return;
+        }
+
+        int standard = arr[start];
+        int low = start;
+        int high = end;
+        while (low < high) {
+
+            // 从右边开始，寻找比标准数小的数
+            while (low < high && arr[high] >= standard) {
+                high--;
+            }
+            arr[low] = arr[high];
+
+            // 然后反方向查找，寻找比标准数大的数
+            while (low < high && arr[low] <= standard) {
+                low++;
+            }
+            arr[high] = arr[low];
+        }
+        arr[low] = standard;
+
+        // 递归
+        quickSort(arr, start, low);
+        quickSort(arr, low + 1, end);
+    }
+    ```
+
+【插入排序】
+    ```Java
+    private static void insertSort(int[] arr) {
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] < arr[i - 1]) {
+                int temp = arr[i];
+                int j;
+                for (j = i - 1; j >= 0 && temp < arr[j]; j--) {
+                    arr[j + 1] = arr[j];
+                }
+                arr[j + 1] = temp;
+            }
+        }
+    }
+    ```
+
+【希尔排序】
+    ```java
+    private static void shellSort(int[] arr) {
+        for (int step = arr.length / 2; step > 0; step = step / 2) {
+        // 根据步长分组之后排序
+        for (int i = step; i < arr.length; i++) {
+            for (int j = i - step; j >= 0; j -= step) {
+            if (arr[j] > arr[j + step]) {
+                swap(arr, j, j + step);
+            }
+            }
+        }
+    }
+    }
+    ```
+
+【选择排序】
+    ```java
+    private static void selectSort(int[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < arr.length; j++) {
+                if (arr[minIndex] > arr[j]) {
+                minIndex = j;
+                }
+            }
+            if (i != minIndex) {
+                swap(arr, i, minIndex);
+            }
+        }
+    }
+    ```
+
 ## 微服务
 
 > 1.前后端分离是怎么做的？
