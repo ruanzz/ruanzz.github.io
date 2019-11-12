@@ -282,7 +282,7 @@ github_widget: true
 #       loading-bar|mac-osx|minimal
 # color: black|blue|green|orange|pink|purple|red|silver|white|yellow|
 progressBar:
-  on: true
+  on: false
   type: "minimal"  # Keep Quotes | 保留引号避免出错
   color: blue
 
@@ -299,3 +299,16 @@ CDN:
   clipboard: //cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js
   mathjax: //cdn.bootcss.com/mathjax/2.6.1/MathJax.js
   scrollreveal: //cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js
+ 
+LOCAL:
+  jquery: /js/jquery.min.js
+  require: /js/require.min.js
+  fontawesome: /css/font-awesome.min.css
+  fancybox_js: /js/jquery.fancybox.min.js
+  fancybox_css: /css/jquery.fancybox.min.css
+  jquery_ui_js: /js/jquery-ui.min.js
+  jquery_ui_css: /css/jquery-ui.min.css
+  pace_js: /js/pace.min.js
+  clipboard: /js/clipboard.min.js
+  mathjax: /js/MathJax.js
+  scrollreveal: /js/scrollreveal.min.js
