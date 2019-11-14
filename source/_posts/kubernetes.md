@@ -1,6 +1,6 @@
 ---
 title: Kubernetes
-tags: [k8s]
+tags: [K8s]
 toc: true
 date: 2019-04-07 13:12:47
 category: 云计算
