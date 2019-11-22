@@ -64,7 +64,7 @@
         position:absolute;
         right:0;
         min-height:100%;
-        background: mid-col-color;
+        background: dimgrey;
         left: left-col-width;
         width: auto;
     }
@@ -325,6 +325,7 @@
 
 if hexo-config("github_widget")
     .article-entry .github-widget
+        mix-blend-mode: color-burn
         h3::after
             content none
         .github-box 
