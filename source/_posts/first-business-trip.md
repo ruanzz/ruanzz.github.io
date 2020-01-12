@@ -3,7 +3,7 @@ title: 第一次出差
 tags: [出差]
 toc: true
 date: 2019-12-15 10:32:30
-category: 杂谈
+category: 随笔
 ---
 
 飞机降落在了白云机场，一周的出差顺利结束。

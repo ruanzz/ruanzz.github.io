@@ -1,6 +1,6 @@
 ---
 title: 为什么会抑郁？
-tags: []
+tags: [杂谈]
 toc: true
 date: 2019-07-13 18:06:08
 category: 随笔

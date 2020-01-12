@@ -1,6 +1,6 @@
 ---
 title: 博客一周年了
-tags: []
+tags: [杂谈]
 toc: true
 date: 2019-10-03 6:40:09
 category: 随笔
