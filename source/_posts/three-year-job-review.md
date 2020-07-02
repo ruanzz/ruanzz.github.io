@@ -1,9 +1,9 @@
 ---
 title: 三年
-tags: []
+tags: [职场]
 toc: true
 date: 2020-07-01 20:15:20
-category:
+category: 随笔
 ---
 
 亲爱的XXX，今天是值得纪念的日子，很高兴有您一路同行。
