@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="前后端分离之后，前后端人员通过接口数据进行交互，目前大部分都是通过RESTful API来进行的，双方各司其职，各发挥长处，但是同时也带来了沟通成本的增加，那么你了解REST吗？你的API是RESTful的吗？本文将和工作中内容关联起来阐述我眼中的REST。">
+<meta name="keywords" content="API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RESTful API">
+<meta property="og:url" content="https://ruanzz.github.io/2019/03/31/restful/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="前后端分离之后，前后端人员通过接口数据进行交互，目前大部分都是通过RESTful API来进行的，双方各司其职，各发挥长处，但是同时也带来了沟通成本的增加，那么你了解REST吗？你的API是RESTful的吗？本文将和工作中内容关联起来阐述我眼中的REST。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RESTful API">
+<meta name="twitter:description" content="前后端分离之后，前后端人员通过接口数据进行交互，目前大部分都是通过RESTful API来进行的，双方各司其职，各发挥长处，但是同时也带来了沟通成本的增加，那么你了解REST吗？你的API是RESTful的吗？本文将和工作中内容关联起来阐述我眼中的REST。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>RESTful API | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-restful" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/03/31/restful/" class="article-date">
+      <time datetime="2019-03-31T21:22:08.000Z" itemprop="datePublished">2019-03-31</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RESTful API
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Web/">Web</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/API/">API</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>前后端分离之后，前后端人员通过接口数据进行交互，目前大部分都是通过RESTful API来进行的，双方各司其职，各发挥长处，但是同时也带来了沟通成本的增加，那么你了解REST吗？你的API是RESTful的吗？本文将和工作中内容关联起来阐述我眼中的REST。<br><a id="more"></a></p>
+<blockquote>
+<p>REST即表述性状态传递（英文：Representational State Transfer，简称REST）是Roy Fielding博士在2000年他的博士论文中提出来的一种软件架构风格。它是一种针对网络应用的设计和开发方式，可以降低开发的复杂性，提高系统的可伸缩性。</p>
+</blockquote>
+<p>看了REST的定义，什么也没明白，下面我来说说什么是REST，如何让你的API设计成RESTful。</p>
+<p>REST把所有的东西都看成资源，RESTful的接口为 动词 + 名词，比如我们订单接口，那么订单就可以认为是一种资源，可以通过URI接口来获取，那么获取资源接口就可以设计成 <code>GET</code> <code>/orders</code>，这就是动词 + 名词。</p>
+<p>动词常用有四种： <code>GET</code> <code>POST</code> <code>PUT</code> <code>DELETE</code><br>名词就是特定的资源了，和具体的业务有关，是名词就行。</p>
+<ul>
+<li><code>GET</code> /orders 获取订单列表</li>
+<li><code>GET</code> /orders/{id} 获取某个订单</li>
+<li><code>POST</code> /orders 新增订单</li>
+<li><code>PUT</code> /orders/{id} 修改某个订单</li>
+<li><code>DELETE</code> /orders/{id} 删除某个订单</li>
+</ul>
+<p>还有一个就是状态码的管理,但是这个工作中用的不怎么规范。<br>【成功状态】</p>
+<ul>
+<li><code>GET</code> <code>200</code> OK</li>
+<li><code>POST</code> <code>201</code> Created</li>
+<li><code>PUT</code> <code>200</code> OK</li>
+<li><code>DELETE</code> <code>204</code> No Contents<br>【错误状态】</li>
+<li><code>500</code> 服务器内部错误</li>
+<li><code>503</code> 服务器无法处理请求</li>
+<li><code>400</code> 错误请求，请求体不对</li>
+<li><code>405</code> 错误请求，请求方法不对</li>
+<li><code>401</code> 错误请求，身份认证通不过</li>
+<li><code>403</code> 错误请求，未授权</li>
+</ul>
+<p>这就是常用的接口设计方案，这样子的接口就是符合RESTful的，看起来挺简单，但是这个跨越却是历史性，这样子接口的设计就会有一个规范，大家都默认这种描述资源的方式比较直观，接口都是通过json来传递数据，比较轻量级，这样子就统一起来，不像之前只有GET和POST，而且接口都是开发人员随便起的，因为这个接口只有他一个人用，还有可能通过xml数据传输，即使提供出去，那也是一团糟。</p>
+<p>说完了REST和RESTful，来讲讲工作中都怎么用。</p>
+<p>现在常用的REST框架有Jersey和CXF，当然SpringMVC也是支持RESTful API的，目前来说,SpringMVC是主流，之前项目中有用Jersey，我觉得Jersey也挺好用，而且内置jetty来处理Web请求，有点类似目前主流的SpringBoot的一部分功能。</p>
+<p>最近在和一个第三方厂商对接接口，我开发完成了接口，想要做一个模拟对接服务，代码肯定是不能写在项目中，只能另外写一个项目来提供对接接口，当时首先想到的就是SpringBoot来提供一站式解决方案，简单快捷，但是后来想了想觉得有点重了，只是提供一个模拟接口而已，只需要提供要给接口出来返回json就行，想到了之前用过Jersey，就用Jersey+Gson来完成了，今天也开了个仓库来记录，以后可能还会用到。</p>
+<div class="github-widget" data-repo="ruanzz/Api"></div>
+
+<p>把项目clone下来之后，运行<code>ApiApplication</code>的<code>main()</code>方法就可以把一个REST服务跑起来，借助的是内嵌的Jetty服务器，看到这里是不是觉得和SpringBoot有点类似？是的，软件的思想其实都是殊途同归的，触类旁通很重要。</p>
+<p>接下来访问增删改查接口</p>
+<p>curl -H ‘Content-Type:application/json’ -XPOST <a href="http://127.0.0.1:8080/demos" target="_blank" rel="noopener">http://127.0.0.1:8080/demos</a> -d ‘{“id”:5,name:”demo5”}’<br>{“id”:5,”name”:”demo5”,”createTime”:”2019-03-31 56:22:37”}</p>
+<p>curl -XGET <a href="http://localhost:8080/demos/5" target="_blank" rel="noopener">http://localhost:8080/demos/5</a><br>{“id”:5,”name”:”demo5”,”createTime”:”2019-03-31 56:22:37”}</p>
+<p> curl -H ‘Content-Type:application/json’ -XPUT <a href="http://127.0.0.1:8080/demos/5" target="_blank" rel="noopener">http://127.0.0.1:8080/demos/5</a> -d ‘{name:”demo5-1”}’<br>{“id”:5,”name”:”demo5-1”,”createTime”:”2019-03-31 56:22:37”}</p>
+<p> curl -XDELETE <a href="http://127.0.0.1:8080/demos/5" target="_blank" rel="noopener">http://127.0.0.1:8080/demos/5</a><br>“sucess”</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/03/31/restful/">RESTful API</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-03-31, 21:22:08</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/03/31/restful/" title="RESTful API">https://ruanzz.github.io/2019/03/31/restful/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/03/31/restful/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/04/01/rabbitmq/">
+                    RabbitMQ
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/24/office-skill/">
+                    职场技能
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"RESTful API　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/04/01/rabbitmq/" title="上一篇: RabbitMQ">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/24/office-skill/" title="下一篇: 职场技能">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

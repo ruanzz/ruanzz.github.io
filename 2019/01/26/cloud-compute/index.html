@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="什么是云？我的简单理解是对资源的动态管理，以前一直用的一个词叫做按需取用，按需付费。我目前所从事就是云计算行业，云计算最初提出来就是为了实现资源的动态管理，包括计算资源(CPU和内存)，网络资源和存储资源。动态这个是我自己的理解，更专业的叫做弹性，体现在两个方面：一个方面就是想什么时候要就什么时候要，需要的时候从资源池里边拿就行。一个方面是想要多少有多少，当然这个前提是不能超过你的整个资源池所能提">
+<meta name="keywords" content="杂谈">
+<meta property="og:type" content="article">
+<meta property="og:title" content="谈谈云">
+<meta property="og:url" content="https://ruanzz.github.io/2019/01/26/cloud-compute/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="什么是云？我的简单理解是对资源的动态管理，以前一直用的一个词叫做按需取用，按需付费。我目前所从事就是云计算行业，云计算最初提出来就是为了实现资源的动态管理，包括计算资源(CPU和内存)，网络资源和存储资源。动态这个是我自己的理解，更专业的叫做弹性，体现在两个方面：一个方面就是想什么时候要就什么时候要，需要的时候从资源池里边拿就行。一个方面是想要多少有多少，当然这个前提是不能超过你的整个资源池所能提">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="谈谈云">
+<meta name="twitter:description" content="什么是云？我的简单理解是对资源的动态管理，以前一直用的一个词叫做按需取用，按需付费。我目前所从事就是云计算行业，云计算最初提出来就是为了实现资源的动态管理，包括计算资源(CPU和内存)，网络资源和存储资源。动态这个是我自己的理解，更专业的叫做弹性，体现在两个方面：一个方面就是想什么时候要就什么时候要，需要的时候从资源池里边拿就行。一个方面是想要多少有多少，当然这个前提是不能超过你的整个资源池所能提">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>谈谈云 | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-cloud-compute" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/01/26/cloud-compute/" class="article-date">
+      <time datetime="2019-01-26T22:19:21.000Z" itemprop="datePublished">2019-01-26</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      谈谈云
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/云计算/">云计算</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/杂谈/">杂谈</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>什么是云？我的简单理解是对资源的动态管理，以前一直用的一个词叫做按需取用，按需付费。我目前所从事就是云计算行业，云计算最初提出来就是为了实现资源的动态管理，包括计算资源(CPU和内存)，网络资源和存储资源。动态这个是我自己的理解，更专业的叫做弹性，体现在两个方面：一个方面就是想什么时候要就什么时候要，需要的时候从资源池里边拿就行。一个方面是想要多少有多少，当然这个前提是不能超过你的整个资源池所能提供的上限。<br><a id="more"></a><br>云计算看起来挺简单的，就是对资源的动态管理嘛！不就是个管理系统嘛，分分钟搞定，话呢还先不要说的这么满！来看看云计算的发展历程就知道了，任何东西存在都有一个演进的过程。</p>
+<ol>
+<li>物理设备阶段<br>这个时候需要上线一个应用，直接买台物理机放在数据中心，装好操作系统，配好网络就可以准备上线应用了。物理设备有很好的性能，但是有一个很要命的缺点，不能做到很好的灵活性，首先它不能够达到想什么时候要就什么时候要，比如买台服务器，这个是需要采购时间的，采购回来还要配存储，装操作系统，配网络等等，这些都是需要时间的，就比如说采购吧，就算和供应商关系好，怎么也得一个星期吧，而且后期扩展内存，存储这些都是需要时间的，三个字总结就是不灵活！<br><strong>为了解决这个问题，引入虚拟化技术。</strong></li>
+<li>虚拟化阶段<br>用户就是想要一台机器来部署应用，数据中心的物理设备都是很强大的，可以考虑从现有的设备虚拟出一个完整的机器出来给用户部署应用，完整的虚拟化出CPU，内存，网络，存储等资源。在现有物理设备上虚拟化出这些资源是非常快的，基本上几分钟内就能解决，如果是VSAN存储的话可能几十秒内就创建出一台虚拟机了。如果这台机器不用了，可以直接删除回收资源，这样子就能很好的解决物理设备的灵活性问题。<br><strong>但是新的问题又来了，怎么把物理设备虚拟化？</strong><br>提到虚拟化，不可避免的要提到VMware，这是一家低调赚钱的公司，虚拟化软件做的很好，性能也很好，软件也卖的很好，赚了非常多的钱，用一个案例来描述这家公司赚钱的程度，大部分的数据中心或多或少都用VMware的产品，至少我接触到的金融或者运营商客户基本都是在用，只要是X86机器，大部分都是装的ESXi，其余的是Xen或者KVM，据我所知，一个省级的运营商建造一个数据中心的经费是十几亿的人民币，这都是白花花的银子啊。扯远了，回到主题，VMware是一家商业公司，它的虚拟化软件代码是闭源的，要用就要付钱买license，但是世界上还会有很多有情怀的人的，一些大牛程序员觉得这个技术我也会，你能开发我也能开发出来，我开发出来就是不收钱，把代码拿出来分享给大家，这就是开源，不能让你一家独大，不能什么钱都让你赚了，开源的虚拟化软件有Xen和KVM,开源意味着代码你可以拿得到，但是hold不hold的住就是另外一个问题了，现在开源的主流应该是KVM，这个对技术的要求还是有一定的门槛。<br><strong>虚拟化软件解决了物理设备的灵活性，这就是云计算？</strong><br>答案很显然不是！技术和概念还是在不断的演进，因为还没到弹性的概念，到现在只是解决了物理设备的灵活性，可以从物理设备中虚拟化出一台机器，需要人工指定从哪台物理主机设备上虚拟化，可能还需要比较复杂的人工配置，比如CPU大小，内存要多大，磁盘放在哪个存储，将磁盘挂载到虚拟化出来的机器，需要多少块网卡，网卡的配置等等这些。所以，如果仅仅是虚拟化软件来管理物理主机的话规模一般不会很大，可能最多100台服务器就管不过来了，太复杂了。后期就会发现时间都会耗在这些人工配置上了，并且这百十来台服务器，还远达不到想要多少要多少的程度，走了一圈又回去了，这就尴尬了。规模大了，单凭虚拟化软件人工配置耗时比较长，如何解决？<br><strong>为了解决这个问题，用调度算法</strong></li>
+<li>池化阶段<br>调度算法！算法就是这么一个神奇的东西，没有一点点防备，就这样子出现，带给我们惊喜。调度算法长什么样呢？要想调度，首先要把资源整合起来，对于数据中心来说就是把计算资源、存储资源、网络资源进行池化，把这些资源放在一个资源池里边，调度算法在这个资源池里边进行资源的调度，用户需要多少的CPU，内存，磁盘的虚拟机，调度算法就会自动在资源池里边寻找一台能满足用户需求的物理主机，在这台物理主机上虚拟化一台虚拟机，按照用户要的配置自动配置好虚拟机，用户就能直接用了。<br>好了，到现在已经实现资源的弹性了，就是常说的IaaS,这样子就足够了吗？显然不够，点几下鼠标一台虚拟机出来了，你还得登录到虚拟机上进行部署你的应用，如果是几十台虚拟机，你还是得人工去扩容，一台一台的去部署你的应用，哎，还得继续演进~<br><strong>云计算不仅要管资源，还要管应用</strong></li>
+<li>应用阶段<br>应用阶段是我自己起的，为了实现应用的灵活性，于是又在IaaS上加了一层，用来管理资源以上的应用弹性问题。这个应用大致可以分为两种：一种是通用的应用，一种是自己的应用。先来说说通用，通用的应用比如说数据库，缓存，消息队列这些软件，大家的配置其实都差不多，我们只需把自己的应用对接起来用就完了，云平台需要保证的是提供的这些通用应用不能挂，而且配置不允许改变，所以云平台需要养一批人这些人来维护，比如说MySQL数据库，需要云平台这边的MySQL高手来维护这些MySQL应用，保证服务可用。作为用户，你可以专注于业务，其余数据库的性能问题都可以花钱交给云平台来做，比如数据库的分库分表，读写分离等等。再来看看用户自己的应用，自有应用要实现自动安装，这个是云平台帮不了你的，因为是你开发，只有你才知道如何部署，云平台所能做的就是提供自动化安装条件，自动化安装脚本得你来写，所以云平台往往会提供一个工具，能够让你在新创建出来的虚拟机进行自动化部署你的应用，实现应用层面的真正弹性。这些自动化部署工具有Chef、Puppet、Ansible等，后边应该会写一些文章来讲Ansible。当然了，2018年是容器元年，容器在2018年火了，容器也能很好的解决应用部署问题，但容器不仅仅就是这么点功能，后续应该也会写一些文章来讲讲Docker。</li>
+</ol>
+<p>看完了云计算的演进过程，再来看看云的分类：私有云和公有云。也有把私有云和公有云混合建设的，名字简单明了，就叫混合云，这个就不用细说了，先来看看什么是私有云，私有云就会把虚拟化软件和池化软件部署在别人数据中心里边，LZ从事的就是私有云方向。使用私有云的客户往往很有钱，自建IDC，然后买云厂商的解决方方案，让自己的IT基础建设池化，也叫云化。再来看看公有云，我想每个人接触云都是从公有云开始的，像国外的AWS，国内阿里云、腾讯云、百度云。公有云和私有云不同在于，云数据中心是云厂商自建的，从虚拟化软件到池化，再到服务器等物理设备都是云厂商一家提供的，用户不需要很大的时间和人力投入，只要注册一个账号，点几下鼠标就可以创建出一台虚拟机。</p>
+<blockquote>
+<p>说个题外话，不知道有没有人像我以前一样好奇，为什么云计算这个东西是电商公司做的非常好，国外的亚马逊，国内的阿里云，这都是电商巨头，现在又多了一个十分赚钱的业务【云计算】。为什么是电商公司而不是传统的IT巨头微软，IBM这些呢？跟我来细细品味，首先一个技术的诞生和蓬勃发展肯定是解决了某些业务场景所遇到的难题，电商的业务场景有哪些可能和云计算扯上关系呢？其实都是，最典型的就是大促，特别是国内的双十一，大家都在这一天疯狂的上淘系应用买东西，后台负载那是前无古人，后无来者啊，不能总是提前准备好很多的物理机来支撑这一天的大促，而且物理机也不能很快的进行扩容，所以总是部署了很多的物理机，以防业务中断，如果淘系应用在双十一这一天挂了，损失的可是千亿级别营业额！！还有大促过后，很多的物理机器都是闲置的，你还不能断电，这些机器都是嗜血的，不能赚钱还得养着他们，大促一天赚来的钱都不够养啊。这个时候做云就势在必行了，大促期间创建大量的虚拟机来支撑，双十一过后释放掉资源，包装成云产品卖给其他客户，又赚了一笔。但是做云这个真的太难了，首先肯定不能用商业软件，因为商业软件的费用非常高，而且这些商业软件的公司并没有这种业务场景，很快就会遇到瓶颈，这种时候只能用开源解决方案，但是得有高手在，要hold得住这些开源的东西，这也造就了阿里云的一批国内的顶尖高手。电商业务发展需要云平台的支撑，云平台撑住了又可以让电商更加繁荣的发展，这简直了，相辅相成，赚的可谓是让国内其他公司嫉妒啊，后来很多公司纷纷做云，或者纷纷做电商，但是都干不过阿里，很简单，后来者只能喝汤，还有业务和云不能做到相辅相成。开源的解决方案中目前比较主流的是KVM,以及池化平台OpenStack，这两个结合在一起应该算是云计算开源平台的标准了，几乎每个云计算厂商都有做兼容，甚至是二次开发。但是2018年，容器火了，淘系应用也全部容器化，为什么容器这么火，因为它完美的诠释了弹性计算，秒级启动，性能强大，几乎不浪费资源等特性深受大家追捧，但是这个并不是新兴的技术，是Linux内核支撑的，但是这也不得不佩服。</p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/01/26/cloud-compute/">谈谈云</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-01-26, 22:19:21</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/01/26/cloud-compute/" title="谈谈云">https://ruanzz.github.io/2019/01/26/cloud-compute/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/01/26/cloud-compute/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/02/06/mysql-optimize/">
+                    MySQL优化思路
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/01/18/flag/">
+                    Flag
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"谈谈云　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/02/06/mysql-optimize/" title="上一篇: MySQL优化思路">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/01/18/flag/" title="下一篇: Flag">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

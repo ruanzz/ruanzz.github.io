@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="Kubernetes是Google内部容器编排引擎Borg的开源版本，之前写过一篇文章介绍过，并且使用Minukube来进行安装，但是那个只能是自己本地来体验一下，在研发测试环境中一般都会是使用Kubeadm来部署Kubernetes集群，Kubeadm是官方提供的Kubernetes集群安装工具，还在不断迭代，目前还没有达到GA版本，所以生产环境中还都是二进制源码安装。">
+<meta name="keywords" content="K8s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubeadm搭建K8s环境">
+<meta property="og:url" content="https://ruanzz.github.io/2019/11/10/kubeadm/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="Kubernetes是Google内部容器编排引擎Borg的开源版本，之前写过一篇文章介绍过，并且使用Minukube来进行安装，但是那个只能是自己本地来体验一下，在研发测试环境中一般都会是使用Kubeadm来部署Kubernetes集群，Kubeadm是官方提供的Kubernetes集群安装工具，还在不断迭代，目前还没有达到GA版本，所以生产环境中还都是二进制源码安装。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/kubernetes/service:nginx.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/kubernetes/login.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/kubernetes/dashboard.png">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubeadm搭建K8s环境">
+<meta name="twitter:description" content="Kubernetes是Google内部容器编排引擎Borg的开源版本，之前写过一篇文章介绍过，并且使用Minukube来进行安装，但是那个只能是自己本地来体验一下，在研发测试环境中一般都会是使用Kubeadm来部署Kubernetes集群，Kubeadm是官方提供的Kubernetes集群安装工具，还在不断迭代，目前还没有达到GA版本，所以生产环境中还都是二进制源码安装。">
+<meta name="twitter:image" content="https://ruanzz.github.io/asset/img/kubernetes/service:nginx.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Kubeadm搭建K8s环境 | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-kubeadm" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/10/kubeadm/" class="article-date">
+      <time datetime="2019-11-10T18:22:16.000Z" itemprop="datePublished">2019-11-10</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kubeadm搭建K8s环境
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/云计算/">云计算</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>Kubernetes是Google内部容器编排引擎Borg的开源版本，之前写过一篇文章介绍过，并且使用Minukube来进行安装，但是那个只能是自己本地来体验一下，在研发测试环境中一般都会是使用Kubeadm来部署Kubernetes集群，Kubeadm是官方提供的Kubernetes集群安装工具，还在不断迭代，目前还没有达到GA版本，所以生产环境中还都是二进制源码安装。</p>
+<a id="more"></a>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><h3 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h3><p>三台CentOS7.7的虚拟机配置,每台虚拟机两个网卡，一张网卡用于集群内部通信，一张网卡用于上网。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Hostname</th>
+<th style="text-align:center">CPU</th>
+<th style="text-align:center">Memoroy</th>
+<th style="text-align:center">ip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">k8s-master</td>
+<td style="text-align:center">2C</td>
+<td style="text-align:center">2GB</td>
+<td style="text-align:center">192.168.56.4,10.0.2.15</td>
+</tr>
+<tr>
+<td style="text-align:center">k8s-node1</td>
+<td style="text-align:center">2C</td>
+<td style="text-align:center">2GB</td>
+<td style="text-align:center">192.168.56.5,10.0.2.16</td>
+</tr>
+<tr>
+<td style="text-align:center">k8s-node2</td>
+<td style="text-align:center">2C</td>
+<td style="text-align:center">2GB</td>
+<td style="text-align:center">192.168.56.6,10.0.2.17</td>
+</tr>
+</tbody>
+</table>
+<h3 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h3><p>Kubernetes集群内部需要通信，需要开放相关端口，具体需要开放哪些端口可以在官方文档中查找，这里为了方便，直接将防火墙关闭。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld &amp;&amp; systemctl disable firewalld</span><br></pre></td></tr></table></figure>
+<h3 id="关闭selinux"><a href="#关闭selinux" class="headerlink" title="关闭selinux"></a>关闭selinux</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i 's/enforcing/disabled/' /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure>
+<h3 id="关闭swap"><a href="#关闭swap" class="headerlink" title="关闭swap"></a>关闭swap</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">临时</span></span><br><span class="line">swapoff -a </span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">永久</span></span><br><span class="line">vim /etc/fstab  删除挂载swap分区</span><br></pre></td></tr></table></figure>
+<h3 id="添加host映射"><a href="#添加host映射" class="headerlink" title="添加host映射"></a>添加host映射</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/hosts</span><br></pre></td></tr></table></figure>
+<h3 id="修改iptable规则"><a href="#修改iptable规则" class="headerlink" title="修改iptable规则"></a>修改iptable规则</h3><p>将桥接的IPv4流量传递到iptables的链<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line">EOF</span><br><span class="line">  </span><br><span class="line">sysctl --system</span><br></pre></td></tr></table></figure></p>
+<h2 id="安装Docker"><a href="#安装Docker" class="headerlink" title="安装Docker"></a>安装Docker</h2><h3 id="添加Docker源"><a href="#添加Docker源" class="headerlink" title="添加Docker源"></a>添加Docker源</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -O /etc/yum.repos.d/docker-ce.repo  https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
+<h3 id="安装Docker-1"><a href="#安装Docker-1" class="headerlink" title="安装Docker"></a>安装Docker</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker-ce-18.06.1.ce-3.el7 -y</span><br></pre></td></tr></table></figure>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable docker &amp;&amp; systemctl start docker</span><br></pre></td></tr></table></figure>
+<h2 id="安装KubeAdm"><a href="#安装KubeAdm" class="headerlink" title="安装KubeAdm"></a>安装KubeAdm</h2><h3 id="添加KubeAdm源"><a href="#添加KubeAdm源" class="headerlink" title="添加KubeAdm源"></a>添加KubeAdm源</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo</span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">repo_gpgcheck=1</span><br><span class="line">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum install kubelet-1.13.3 -y</span><br><span class="line">yum install kubectl-1.13.3 -y</span><br><span class="line">yum install kubeadm-1.13.3 -y</span><br><span class="line">systemctl enable kubelet</span><br></pre></td></tr></table></figure>
+<h2 id="初始化Master节点"><a href="#初始化Master节点" class="headerlink" title="初始化Master节点"></a>初始化Master节点</h2><p>所有的准备工作都弄好了，上边的所有操作都需要在各个节点进行执行安装，从这里开始将分Master和Node节点进行不同的初始化操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init \</span><br><span class="line">--apiserver-advertise-address=192.168.56.4 \</span><br><span class="line">--image-repository registry.aliyuncs.com/google_containers \</span><br><span class="line">--kubernetes-version v1.13.3 \</span><br><span class="line">--service-cidr=10.1.0.0/16 \</span><br><span class="line">--pod-network-cidr=10.244.0.0/16</span><br></pre></td></tr></table></figure>
+<p><code>--apiserver-advertise-address:</code>  master的集群内部IP</p>
+<p>等待KubeAdm初始化Master完成，最后会有这个提示,需要记录下这个，后边加入Node节点需要。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join 192.168.56.4:6443 --token oqqiog.wn8a8vj1kbf3cfko --discovery-token-ca-cert-hash sha256:a64ed306edd5ee0bdacf523e0c2098cc6c29c070021ae81bed66f7d241484422</span><br></pre></td></tr></table></figure>
+<h3 id="Kubectl访问K8s"><a href="#Kubectl访问K8s" class="headerlink" title="Kubectl访问K8s"></a>Kubectl访问K8s</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir $HOME/.kube</span><br><span class="line">cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">kubectl get pods</span><br></pre></td></tr></table></figure>
+<h3 id="安装flannel网络插件"><a href="#安装flannel网络插件" class="headerlink" title="安装flannel网络插件"></a>安装flannel网络插件</h3><p>Kubernetes内部的网络是扁平化的，K8s默认是这样子的，但是现实却不是，所以就有很多网络插件来实现，K8s内部提供了CNI接口来做规范，下面我们使用其中的一种插件来做实现。</p>
+<p>参考flannel的文档<br> <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml</span><br></pre></td></tr></table></figure></p>
+<p> 安装完成了可以通过<code>kubectl get pods -n kube-system</code>看到flannel相关的pod已经运行起来了。</p>
+<p>这里把kube-flannel.yml文件做个备份<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br><span class="line">518</span><br><span class="line">519</span><br><span class="line">520</span><br><span class="line">521</span><br><span class="line">522</span><br><span class="line">523</span><br><span class="line">524</span><br><span class="line">525</span><br><span class="line">526</span><br><span class="line">527</span><br><span class="line">528</span><br><span class="line">529</span><br><span class="line">530</span><br><span class="line">531</span><br><span class="line">532</span><br><span class="line">533</span><br><span class="line">534</span><br><span class="line">535</span><br><span class="line">536</span><br><span class="line">537</span><br><span class="line">538</span><br><span class="line">539</span><br><span class="line">540</span><br><span class="line">541</span><br><span class="line">542</span><br><span class="line">543</span><br><span class="line">544</span><br><span class="line">545</span><br><span class="line">546</span><br><span class="line">547</span><br><span class="line">548</span><br><span class="line">549</span><br><span class="line">550</span><br><span class="line">551</span><br><span class="line">552</span><br><span class="line">553</span><br><span class="line">554</span><br><span class="line">555</span><br><span class="line">556</span><br><span class="line">557</span><br><span class="line">558</span><br><span class="line">559</span><br><span class="line">560</span><br><span class="line">561</span><br><span class="line">562</span><br><span class="line">563</span><br><span class="line">564</span><br><span class="line">565</span><br><span class="line">566</span><br><span class="line">567</span><br><span class="line">568</span><br><span class="line">569</span><br><span class="line">570</span><br><span class="line">571</span><br><span class="line">572</span><br><span class="line">573</span><br><span class="line">574</span><br><span class="line">575</span><br><span class="line">576</span><br><span class="line">577</span><br><span class="line">578</span><br><span class="line">579</span><br><span class="line">580</span><br><span class="line">581</span><br><span class="line">582</span><br><span class="line">583</span><br><span class="line">584</span><br><span class="line">585</span><br><span class="line">586</span><br><span class="line">587</span><br><span class="line">588</span><br><span class="line">589</span><br><span class="line">590</span><br><span class="line">591</span><br><span class="line">592</span><br><span class="line">593</span><br><span class="line">594</span><br><span class="line">595</span><br><span class="line">596</span><br><span class="line">597</span><br><span class="line">598</span><br><span class="line">599</span><br><span class="line">600</span><br><span class="line">601</span><br><span class="line">602</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">apiVersion: policy/v1beta1</span><br><span class="line">kind: PodSecurityPolicy</span><br><span class="line">metadata:</span><br><span class="line">  name: psp.flannel.unprivileged</span><br><span class="line">  annotations:</span><br><span class="line">    seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default</span><br><span class="line">    seccomp.security.alpha.kubernetes.io/defaultProfileName: docker/default</span><br><span class="line">    apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default</span><br><span class="line">    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default</span><br><span class="line">spec:</span><br><span class="line">  privileged: false</span><br><span class="line">  volumes:</span><br><span class="line">    - configMap</span><br><span class="line">    - secret</span><br><span class="line">    - emptyDir</span><br><span class="line">    - hostPath</span><br><span class="line">  allowedHostPaths:</span><br><span class="line">    - pathPrefix: "/etc/cni/net.d"</span><br><span class="line">    - pathPrefix: "/etc/kube-flannel"</span><br><span class="line">    - pathPrefix: "/run/flannel"</span><br><span class="line">  readOnlyRootFilesystem: false</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Users and groups</span></span><br><span class="line">  runAsUser:</span><br><span class="line">    rule: RunAsAny</span><br><span class="line">  supplementalGroups:</span><br><span class="line">    rule: RunAsAny</span><br><span class="line">  fsGroup:</span><br><span class="line">    rule: RunAsAny</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Privilege Escalation</span></span><br><span class="line">  allowPrivilegeEscalation: false</span><br><span class="line">  defaultAllowPrivilegeEscalation: false</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Capabilities</span></span><br><span class="line">  allowedCapabilities: ['NET_ADMIN']</span><br><span class="line">  defaultAddCapabilities: []</span><br><span class="line">  requiredDropCapabilities: []</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Host namespaces</span></span><br><span class="line">  hostPID: false</span><br><span class="line">  hostIPC: false</span><br><span class="line">  hostNetwork: true</span><br><span class="line">  hostPorts:</span><br><span class="line">  - min: 0</span><br><span class="line">    max: 65535</span><br><span class="line"><span class="meta">  #</span><span class="bash"> SELinux</span></span><br><span class="line">  seLinux:</span><br><span class="line">    # SELinux is unused in CaaSP</span><br><span class="line">    rule: 'RunAsAny'</span><br><span class="line">---</span><br><span class="line">kind: ClusterRole</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  name: flannel</span><br><span class="line">rules:</span><br><span class="line">  - apiGroups: ['extensions']</span><br><span class="line">    resources: ['podsecuritypolicies']</span><br><span class="line">    verbs: ['use']</span><br><span class="line">    resourceNames: ['psp.flannel.unprivileged']</span><br><span class="line">  - apiGroups:</span><br><span class="line">      - ""</span><br><span class="line">    resources:</span><br><span class="line">      - pods</span><br><span class="line">    verbs:</span><br><span class="line">      - get</span><br><span class="line">  - apiGroups:</span><br><span class="line">      - ""</span><br><span class="line">    resources:</span><br><span class="line">      - nodes</span><br><span class="line">    verbs:</span><br><span class="line">      - list</span><br><span class="line">      - watch</span><br><span class="line">  - apiGroups:</span><br><span class="line">      - ""</span><br><span class="line">    resources:</span><br><span class="line">      - nodes/status</span><br><span class="line">    verbs:</span><br><span class="line">      - patch</span><br><span class="line">---</span><br><span class="line">kind: ClusterRoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  name: flannel</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: flannel</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: flannel</span><br><span class="line">  namespace: kube-system</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: flannel</span><br><span class="line">  namespace: kube-system</span><br><span class="line">---</span><br><span class="line">kind: ConfigMap</span><br><span class="line">apiVersion: v1</span><br><span class="line">metadata:</span><br><span class="line">  name: kube-flannel-cfg</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    tier: node</span><br><span class="line">    app: flannel</span><br><span class="line">data:</span><br><span class="line">  cni-conf.json: |</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "cbr0",</span><br><span class="line">      "cniVersion": "0.3.1",</span><br><span class="line">      "plugins": [</span><br><span class="line">        &#123;</span><br><span class="line">          "type": "flannel",</span><br><span class="line">          "delegate": &#123;</span><br><span class="line">            "hairpinMode": true,</span><br><span class="line">            "isDefaultGateway": true</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          "type": "portmap",</span><br><span class="line">          "capabilities": &#123;</span><br><span class="line">            "portMappings": true</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  net-conf.json: |</span><br><span class="line">    &#123;</span><br><span class="line">      "Network": "10.244.0.0/16",</span><br><span class="line">      "Backend": &#123;</span><br><span class="line">        "Type": "vxlan"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: kube-flannel-ds-amd64</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    tier: node</span><br><span class="line">    app: flannel</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: flannel</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        tier: node</span><br><span class="line">        app: flannel</span><br><span class="line">    spec:</span><br><span class="line">      affinity:</span><br><span class="line">        nodeAffinity:</span><br><span class="line">          requiredDuringSchedulingIgnoredDuringExecution:</span><br><span class="line">            nodeSelectorTerms:</span><br><span class="line">              - matchExpressions:</span><br><span class="line">                  - key: beta.kubernetes.io/os</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - linux</span><br><span class="line">                  - key: beta.kubernetes.io/arch</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - amd64</span><br><span class="line">      hostNetwork: true</span><br><span class="line">      tolerations:</span><br><span class="line">      - operator: Exists</span><br><span class="line">        effect: NoSchedule</span><br><span class="line">      serviceAccountName: flannel</span><br><span class="line">      initContainers:</span><br><span class="line">      - name: install-cni</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-amd64</span><br><span class="line">        command:</span><br><span class="line">        - cp</span><br><span class="line">        args:</span><br><span class="line">        - -f</span><br><span class="line">        - /etc/kube-flannel/cni-conf.json</span><br><span class="line">        - /etc/cni/net.d/10-flannel.conflist</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: cni</span><br><span class="line">          mountPath: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      containers:</span><br><span class="line">      - name: kube-flannel</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-amd64</span><br><span class="line">        command:</span><br><span class="line">        - /opt/bin/flanneld</span><br><span class="line">        args:</span><br><span class="line">        - --ip-masq</span><br><span class="line">        - --kube-subnet-mgr</span><br><span class="line">        resources:</span><br><span class="line">          requests:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">          limits:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">        securityContext:</span><br><span class="line">          privileged: false</span><br><span class="line">          capabilities:</span><br><span class="line">            add: ["NET_ADMIN"]</span><br><span class="line">        env:</span><br><span class="line">        - name: POD_NAME</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.name</span><br><span class="line">        - name: POD_NAMESPACE</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.namespace</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: run</span><br><span class="line">          mountPath: /run/flannel</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      volumes:</span><br><span class="line">        - name: run</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /run/flannel</span><br><span class="line">        - name: cni</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          configMap:</span><br><span class="line">            name: kube-flannel-cfg</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: kube-flannel-ds-arm64</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    tier: node</span><br><span class="line">    app: flannel</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: flannel</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        tier: node</span><br><span class="line">        app: flannel</span><br><span class="line">    spec:</span><br><span class="line">      affinity:</span><br><span class="line">        nodeAffinity:</span><br><span class="line">          requiredDuringSchedulingIgnoredDuringExecution:</span><br><span class="line">            nodeSelectorTerms:</span><br><span class="line">              - matchExpressions:</span><br><span class="line">                  - key: beta.kubernetes.io/os</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - linux</span><br><span class="line">                  - key: beta.kubernetes.io/arch</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - arm64</span><br><span class="line">      hostNetwork: true</span><br><span class="line">      tolerations:</span><br><span class="line">      - operator: Exists</span><br><span class="line">        effect: NoSchedule</span><br><span class="line">      serviceAccountName: flannel</span><br><span class="line">      initContainers:</span><br><span class="line">      - name: install-cni</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-arm64</span><br><span class="line">        command:</span><br><span class="line">        - cp</span><br><span class="line">        args:</span><br><span class="line">        - -f</span><br><span class="line">        - /etc/kube-flannel/cni-conf.json</span><br><span class="line">        - /etc/cni/net.d/10-flannel.conflist</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: cni</span><br><span class="line">          mountPath: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      containers:</span><br><span class="line">      - name: kube-flannel</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-arm64</span><br><span class="line">        command:</span><br><span class="line">        - /opt/bin/flanneld</span><br><span class="line">        args:</span><br><span class="line">        - --ip-masq</span><br><span class="line">        - --kube-subnet-mgr</span><br><span class="line">        resources:</span><br><span class="line">          requests:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">          limits:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">        securityContext:</span><br><span class="line">          privileged: false</span><br><span class="line">          capabilities:</span><br><span class="line">             add: ["NET_ADMIN"]</span><br><span class="line">        env:</span><br><span class="line">        - name: POD_NAME</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.name</span><br><span class="line">        - name: POD_NAMESPACE</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.namespace</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: run</span><br><span class="line">          mountPath: /run/flannel</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      volumes:</span><br><span class="line">        - name: run</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /run/flannel</span><br><span class="line">        - name: cni</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          configMap:</span><br><span class="line">            name: kube-flannel-cfg</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: kube-flannel-ds-arm</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    tier: node</span><br><span class="line">    app: flannel</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: flannel</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        tier: node</span><br><span class="line">        app: flannel</span><br><span class="line">    spec:</span><br><span class="line">      affinity:</span><br><span class="line">        nodeAffinity:</span><br><span class="line">          requiredDuringSchedulingIgnoredDuringExecution:</span><br><span class="line">            nodeSelectorTerms:</span><br><span class="line">              - matchExpressions:</span><br><span class="line">                  - key: beta.kubernetes.io/os</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - linux</span><br><span class="line">                  - key: beta.kubernetes.io/arch</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - arm</span><br><span class="line">      hostNetwork: true</span><br><span class="line">      tolerations:</span><br><span class="line">      - operator: Exists</span><br><span class="line">        effect: NoSchedule</span><br><span class="line">      serviceAccountName: flannel</span><br><span class="line">      initContainers:</span><br><span class="line">      - name: install-cni</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-arm</span><br><span class="line">        command:</span><br><span class="line">        - cp</span><br><span class="line">        args:</span><br><span class="line">        - -f</span><br><span class="line">        - /etc/kube-flannel/cni-conf.json</span><br><span class="line">        - /etc/cni/net.d/10-flannel.conflist</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: cni</span><br><span class="line">          mountPath: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      containers:</span><br><span class="line">      - name: kube-flannel</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-arm</span><br><span class="line">        command:</span><br><span class="line">        - /opt/bin/flanneld</span><br><span class="line">        args:</span><br><span class="line">        - --ip-masq</span><br><span class="line">        - --kube-subnet-mgr</span><br><span class="line">        resources:</span><br><span class="line">          requests:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">          limits:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">        securityContext:</span><br><span class="line">          privileged: false</span><br><span class="line">          capabilities:</span><br><span class="line">             add: ["NET_ADMIN"]</span><br><span class="line">        env:</span><br><span class="line">        - name: POD_NAME</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.name</span><br><span class="line">        - name: POD_NAMESPACE</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.namespace</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: run</span><br><span class="line">          mountPath: /run/flannel</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      volumes:</span><br><span class="line">        - name: run</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /run/flannel</span><br><span class="line">        - name: cni</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          configMap:</span><br><span class="line">            name: kube-flannel-cfg</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: kube-flannel-ds-ppc64le</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    tier: node</span><br><span class="line">    app: flannel</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: flannel</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        tier: node</span><br><span class="line">        app: flannel</span><br><span class="line">    spec:</span><br><span class="line">      affinity:</span><br><span class="line">        nodeAffinity:</span><br><span class="line">          requiredDuringSchedulingIgnoredDuringExecution:</span><br><span class="line">            nodeSelectorTerms:</span><br><span class="line">              - matchExpressions:</span><br><span class="line">                  - key: beta.kubernetes.io/os</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - linux</span><br><span class="line">                  - key: beta.kubernetes.io/arch</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - ppc64le</span><br><span class="line">      hostNetwork: true</span><br><span class="line">      tolerations:</span><br><span class="line">      - operator: Exists</span><br><span class="line">        effect: NoSchedule</span><br><span class="line">      serviceAccountName: flannel</span><br><span class="line">      initContainers:</span><br><span class="line">      - name: install-cni</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-ppc64le</span><br><span class="line">        command:</span><br><span class="line">        - cp</span><br><span class="line">        args:</span><br><span class="line">        - -f</span><br><span class="line">        - /etc/kube-flannel/cni-conf.json</span><br><span class="line">        - /etc/cni/net.d/10-flannel.conflist</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: cni</span><br><span class="line">          mountPath: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      containers:</span><br><span class="line">      - name: kube-flannel</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-ppc64le</span><br><span class="line">        command:</span><br><span class="line">        - /opt/bin/flanneld</span><br><span class="line">        args:</span><br><span class="line">        - --ip-masq</span><br><span class="line">        - --kube-subnet-mgr</span><br><span class="line">        resources:</span><br><span class="line">          requests:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">          limits:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">        securityContext:</span><br><span class="line">          privileged: false</span><br><span class="line">          capabilities:</span><br><span class="line">             add: ["NET_ADMIN"]</span><br><span class="line">        env:</span><br><span class="line">        - name: POD_NAME</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.name</span><br><span class="line">        - name: POD_NAMESPACE</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.namespace</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: run</span><br><span class="line">          mountPath: /run/flannel</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      volumes:</span><br><span class="line">        - name: run</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /run/flannel</span><br><span class="line">        - name: cni</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          configMap:</span><br><span class="line">            name: kube-flannel-cfg</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: kube-flannel-ds-s390x</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    tier: node</span><br><span class="line">    app: flannel</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: flannel</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        tier: node</span><br><span class="line">        app: flannel</span><br><span class="line">    spec:</span><br><span class="line">      affinity:</span><br><span class="line">        nodeAffinity:</span><br><span class="line">          requiredDuringSchedulingIgnoredDuringExecution:</span><br><span class="line">            nodeSelectorTerms:</span><br><span class="line">              - matchExpressions:</span><br><span class="line">                  - key: beta.kubernetes.io/os</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - linux</span><br><span class="line">                  - key: beta.kubernetes.io/arch</span><br><span class="line">                    operator: In</span><br><span class="line">                    values:</span><br><span class="line">                      - s390x</span><br><span class="line">      hostNetwork: true</span><br><span class="line">      tolerations:</span><br><span class="line">      - operator: Exists</span><br><span class="line">        effect: NoSchedule</span><br><span class="line">      serviceAccountName: flannel</span><br><span class="line">      initContainers:</span><br><span class="line">      - name: install-cni</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-s390x</span><br><span class="line">        command:</span><br><span class="line">        - cp</span><br><span class="line">        args:</span><br><span class="line">        - -f</span><br><span class="line">        - /etc/kube-flannel/cni-conf.json</span><br><span class="line">        - /etc/cni/net.d/10-flannel.conflist</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: cni</span><br><span class="line">          mountPath: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      containers:</span><br><span class="line">      - name: kube-flannel</span><br><span class="line">        image: quay.io/coreos/flannel:v0.11.0-s390x</span><br><span class="line">        command:</span><br><span class="line">        - /opt/bin/flanneld</span><br><span class="line">        args:</span><br><span class="line">        - --ip-masq</span><br><span class="line">        - --kube-subnet-mgr</span><br><span class="line">        resources:</span><br><span class="line">          requests:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">          limits:</span><br><span class="line">            cpu: "100m"</span><br><span class="line">            memory: "50Mi"</span><br><span class="line">        securityContext:</span><br><span class="line">          privileged: false</span><br><span class="line">          capabilities:</span><br><span class="line">             add: ["NET_ADMIN"]</span><br><span class="line">        env:</span><br><span class="line">        - name: POD_NAME</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.name</span><br><span class="line">        - name: POD_NAMESPACE</span><br><span class="line">          valueFrom:</span><br><span class="line">            fieldRef:</span><br><span class="line">              fieldPath: metadata.namespace</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: run</span><br><span class="line">          mountPath: /run/flannel</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          mountPath: /etc/kube-flannel/</span><br><span class="line">      volumes:</span><br><span class="line">        - name: run</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /run/flannel</span><br><span class="line">        - name: cni</span><br><span class="line">          hostPath:</span><br><span class="line">            path: /etc/cni/net.d</span><br><span class="line">        - name: flannel-cfg</span><br><span class="line">          configMap:</span><br><span class="line">            name: kube-flannel-cfg</span><br></pre></td></tr></table></figure></p>
+<h2 id="加入Node节点"><a href="#加入Node节点" class="headerlink" title="加入Node节点"></a>加入Node节点</h2><p> 在初始化Master成功之后Master会提示如何加入集群，分别在每个Node节点上执行即可。</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join 192.168.56.4:6443 --token oqqiog.wn8a8vj1kbf3cfko --discovery-token-ca-cert-hash sha256:a64ed306edd5ee0bdacf523e0c2098cc6c29c070021ae81bed66f7d241484422</span><br></pre></td></tr></table></figure>
+<p> 等待Node节点安装flannel插件和K8s的一些镜像，所有节点都Ready了可以验证集群是否成功。</p>
+<h2 id="测试集群"><a href="#测试集群" class="headerlink" title="测试集群"></a>测试集群</h2><p>在每个Node节点添加阿里云registry加速镜像拉取</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tee /etc/docker/daemon.json &lt;&lt;-'EOF'</span><br><span class="line">&#123;</span><br><span class="line">  "registry-mirrors": ["https://uxk0ognt.mirror.aliyuncs.com"]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>重新加载并重启Docker</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload &amp;&amp; systemctl restart docker</span><br></pre></td></tr></table></figure>
+<h3 id="创建deployment"><a href="#创建deployment" class="headerlink" title="创建deployment"></a>创建deployment</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create deployment nginx --image=nginx</span><br></pre></td></tr></table></figure>
+<h3 id="暴露service"><a href="#暴露service" class="headerlink" title="暴露service"></a>暴露service</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl expose deployment nginx --port=80  --type=NodePort</span><br></pre></td></tr></table></figure>
+<h3 id="访问Service"><a href="#访问Service" class="headerlink" title="访问Service"></a>访问Service</h3><p>暴露service的方式是NodePort，我们可以通过node_ip + node_port来访问nginx</p>
+<p>先来看看nginx的pod是在哪个Node上，以及Serivce暴露出来NodePort<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get pod,svc -o wide</span><br><span class="line">NAME                       READY   STATUS    RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES</span><br><span class="line">pod/nginx-5c7588df-pwx7w   1/1     Running   0          11h   10.244.1.5   k8s-node1   &lt;none&gt;           &lt;none&gt;</span><br><span class="line"></span><br><span class="line">NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)        AGE   SELECTOR</span><br><span class="line">service/kubernetes   ClusterIP   10.1.0.1     &lt;none&gt;        443/TCP        13h   &lt;none&gt;</span><br><span class="line">service/nginx        NodePort    10.1.31.46   &lt;none&gt;        80:30315/TCP   11h   app=n</span><br></pre></td></tr></table></figure></p>
+<p>然后我们就可以通过k8s-nod1的30315端口去访问nginx了。</p>
+<p><img src="/asset/img/kubernetes/service:nginx.png" alt=""></p>
+<h2 id="安装Dashboard"><a href="#安装Dashboard" class="headerlink" title="安装Dashboard"></a>安装Dashboard</h2><h3 id="获取部署yaml文件"><a href="#获取部署yaml文件" class="headerlink" title="获取部署yaml文件"></a>获取部署yaml文件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml</span><br></pre></td></tr></table></figure>
+<h3 id="修改yaml文件"><a href="#修改yaml文件" class="headerlink" title="修改yaml文件"></a>修改yaml文件</h3><h4 id="修改镜像"><a href="#修改镜像" class="headerlink" title="修改镜像"></a>修改镜像</h4><p>Dashboard development的默认镜像是<code>k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1</code>,<br>修改为aliyun的镜像<br><code>registry.cn-hangzhou.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v1.10.0</code>。</p>
+<h4 id="修改Service暴露方式"><a href="#修改Service暴露方式" class="headerlink" title="修改Service暴露方式"></a>修改Service暴露方式</h4><p>Dashboard Service 下暴露方式没有写，默认是clusteIP的方式，这样子我们要在外边访问还得借助kube-proxy，所以把暴露方式改为NodePort方式。</p>
+<p>这里还是做一下记录<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Copyright 2017 The Kubernetes Authors.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Licensed under the Apache License, Version 2.0 (the <span class="string">"License"</span>);</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> you may not use this file except <span class="keyword">in</span> compliance with the License.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> You may obtain a copy of the License at</span></span><br><span class="line"><span class="meta">#</span><span class="bash"></span></span><br><span class="line"><span class="meta">#</span><span class="bash">     http://www.apache.org/licenses/LICENSE-2.0</span></span><br><span class="line"><span class="meta">#</span><span class="bash"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Unless required by applicable law or agreed to <span class="keyword">in</span> writing, software</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> distributed under the License is distributed on an <span class="string">"AS IS"</span> BASIS,</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> See the License <span class="keyword">for</span> the specific language governing permissions and</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> limitations under the License.</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> ------------------- Dashboard Secret ------------------- <span class="comment">#</span></span></span><br><span class="line"></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Secret</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard-certs</span><br><span class="line">  namespace: kube-system</span><br><span class="line">type: Opaque</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"><span class="meta">#</span><span class="bash"> ------------------- Dashboard Service Account ------------------- <span class="comment">#</span></span></span><br><span class="line"></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"><span class="meta">#</span><span class="bash"> ------------------- Dashboard Role &amp; Role Binding ------------------- <span class="comment">#</span></span></span><br><span class="line"></span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">  namespace: kube-system</span><br><span class="line">rules:</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Allow Dashboard to create <span class="string">'kubernetes-dashboard-key-holder'</span> secret.</span></span><br><span class="line">- apiGroups: [""]</span><br><span class="line">  resources: ["secrets"]</span><br><span class="line">  verbs: ["create"]</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Allow Dashboard to create <span class="string">'kubernetes-dashboard-settings'</span> config map.</span></span><br><span class="line">- apiGroups: [""]</span><br><span class="line">  resources: ["configmaps"]</span><br><span class="line">  verbs: ["create"]</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Allow Dashboard to get, update and delete Dashboard exclusive secrets.</span></span><br><span class="line">- apiGroups: [""]</span><br><span class="line">  resources: ["secrets"]</span><br><span class="line">  resourceNames: ["kubernetes-dashboard-key-holder", "kubernetes-dashboard-certs"]</span><br><span class="line">  verbs: ["get", "update", "delete"]</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Allow Dashboard to get and update <span class="string">'kubernetes-dashboard-settings'</span> config map.</span></span><br><span class="line">- apiGroups: [""]</span><br><span class="line">  resources: ["configmaps"]</span><br><span class="line">  resourceNames: ["kubernetes-dashboard-settings"]</span><br><span class="line">  verbs: ["get", "update"]</span><br><span class="line"><span class="meta">  #</span><span class="bash"> Allow Dashboard to get metrics from heapster.</span></span><br><span class="line">- apiGroups: [""]</span><br><span class="line">  resources: ["services"]</span><br><span class="line">  resourceNames: ["heapster"]</span><br><span class="line">  verbs: ["proxy"]</span><br><span class="line">- apiGroups: [""]</span><br><span class="line">  resources: ["services/proxy"]</span><br><span class="line">  resourceNames: ["heapster", "http:heapster:", "https:heapster:"]</span><br><span class="line">  verbs: ["get"]</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">kind: RoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">  namespace: kube-system</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: Role</span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"><span class="meta">#</span><span class="bash"> ------------------- Dashboard Deployment ------------------- <span class="comment">#</span></span></span><br><span class="line"></span><br><span class="line">kind: Deployment</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  revisionHistoryLimit: 10</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      k8s-app: kubernetes-dashboard</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        k8s-app: kubernetes-dashboard</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: kubernetes-dashboard</span><br><span class="line">        image: registry.cn-hangzhou.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v1.10.0</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 8443</span><br><span class="line">          protocol: TCP</span><br><span class="line">        args:</span><br><span class="line">          - --auto-generate-certificates</span><br><span class="line">          # Uncomment the following line to manually specify Kubernetes API server Host</span><br><span class="line">          # If not specified, Dashboard will attempt to auto discover the API server and connect</span><br><span class="line">          # to it. Uncomment only if the default does not work.</span><br><span class="line">          # - --apiserver-host=http://my-address:port</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: kubernetes-dashboard-certs</span><br><span class="line">          mountPath: /certs</span><br><span class="line">          # Create on-disk volume to store exec logs</span><br><span class="line">        - mountPath: /tmp</span><br><span class="line">          name: tmp-volume</span><br><span class="line">        livenessProbe:</span><br><span class="line">          httpGet:</span><br><span class="line">            scheme: HTTPS</span><br><span class="line">            path: /</span><br><span class="line">            port: 8443</span><br><span class="line">          initialDelaySeconds: 30</span><br><span class="line">          timeoutSeconds: 30</span><br><span class="line">      volumes:</span><br><span class="line">      - name: kubernetes-dashboard-certs</span><br><span class="line">        secret:</span><br><span class="line">          secretName: kubernetes-dashboard-certs</span><br><span class="line">      - name: tmp-volume</span><br><span class="line">        emptyDir: &#123;&#125;</span><br><span class="line">      serviceAccountName: kubernetes-dashboard</span><br><span class="line">      # Comment the following tolerations if Dashboard must not be deployed on master</span><br><span class="line">      tolerations:</span><br><span class="line">      - key: node-role.kubernetes.io/master</span><br><span class="line">        effect: NoSchedule</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"><span class="meta">#</span><span class="bash"> ------------------- Dashboard Service ------------------- <span class="comment">#</span></span></span><br><span class="line"></span><br><span class="line">kind: Service</span><br><span class="line">apiVersion: v1</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  type: NodePort</span><br><span class="line">  ports:</span><br><span class="line">    - port: 443</span><br><span class="line">      targetPort: 8443</span><br><span class="line">  selector:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br></pre></td></tr></table></figure></p>
+<p>修改好了之后应用yaml文件<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f kubernetes-dashboard.yaml</span><br></pre></td></tr></table></figure></p>
+<p>等待Dashboard完成。</p>
+<p>查看pod以及service<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get pod,svc -o wide  -n kube-system | grep dashboard</span><br><span class="line"></span><br><span class="line">pod/kubernetes-dashboard-7d77666777-fggbb   1/1     Running   0          11h   10.244.1.6     k8s-node1    &lt;none&gt;           &lt;none&gt;</span><br><span class="line">service/kubernetes-dashboard   NodePort    10.1.126.96   &lt;none&gt;        443:31858/TCP   11h   k8s-app=kubernetes-dashboard</span><br></pre></td></tr></table></figure></p>
+<p>访问k8s-node1节点的31858端口即可访问dashboard</p>
+<p><img src="/asset/img/kubernetes/login.png" alt=""></p>
+<p>要想登录Dashboard，我们还得创建令牌(Token)</p>
+<h3 id="创建SA"><a href="#创建SA" class="headerlink" title="创建SA"></a>创建SA</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create serviceaccount dashboard-admin -n kube-system</span><br></pre></td></tr></table></figure>
+<p>绑定为<code>cluster-admin</code>角色<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin</span><br></pre></td></tr></table></figure></p>
+<p>查看新建的SA的token</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get secret -n kube-system | grep dashboard-admin</span><br><span class="line">dashboard-admin-token-wmx9x                      kubernetes.io/service-account-token   3      26h</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl  describe secret  dashboard-admin-token-wmx9x -n kube-system</span><br><span class="line">Name:         dashboard-admin-token-wmx9x</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.name: dashboard-admin</span><br><span class="line">              kubernetes.io/service-account.uid: 7a56e06d-02b6-11ea-b50b-08002709cf5c</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1025 bytes</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4td214OXgiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiN2E1NmUwNmQtMDJiNi0xMWVhLWI1MGItMDgwMDI3MDljZjVjIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.hcRfR9lcBcTvtVNn0eY5GaQxHisgFX249bKQ-7E-svJGcNNwIZYunJMptz4mY9Yv7xzkYqdMRuqJLDXTeEQYNDZKWAlOq4C85S5yvE1Wusg6-_LaDF0oWARvuJeP4H0owy0wwf4zoEncE_GRxdAPZJbaVP1ZVG1kERN_vb_aRHj9S0QNVmhl-gpIBkDK3Bf03KlIeoGs0yiUvcj9ZtVGRvLGTaae1dPFCLSowFqbyHgCrROwiUksP8eMEjLQ8KLstOoJl7c9Vaxr1T8gLCa35gIaScfKI6zdSAl-wrcQ0pYIYFpMyB355wHebw2aCjpNynNJ00ffvksSyNbRGWuViA</span><br></pre></td></tr></table></figure>
+<p>将token复制，使用token去登录Dashboard。</p>
+<p><img src="/asset/img/kubernetes/dashboard.png" alt=""></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-11-10, 18:22:16</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/11/10/kubeadm/" title="Kubeadm搭建K8s环境">https://ruanzz.github.io/2019/11/10/kubeadm/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/11/10/kubeadm/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/11/13/docker/">
+                    Docker
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/10/03/one-year/">
+                    博客一周年了
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境准备"><span class="toc-number">1.</span> <span class="toc-text">环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#环境说明"><span class="toc-number">1.1.</span> <span class="toc-text">环境说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭防火墙"><span class="toc-number">1.2.</span> <span class="toc-text">关闭防火墙</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭selinux"><span class="toc-number">1.3.</span> <span class="toc-text">关闭selinux</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭swap"><span class="toc-number">1.4.</span> <span class="toc-text">关闭swap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加host映射"><span class="toc-number">1.5.</span> <span class="toc-text">添加host映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改iptable规则"><span class="toc-number">1.6.</span> <span class="toc-text">修改iptable规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装Docker"><span class="toc-number">2.</span> <span class="toc-text">安装Docker</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#添加Docker源"><span class="toc-number">2.1.</span> <span class="toc-text">添加Docker源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装Docker-1"><span class="toc-number">2.2.</span> <span class="toc-text">安装Docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动"><span class="toc-number">2.3.</span> <span class="toc-text">启动</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装KubeAdm"><span class="toc-number">3.</span> <span class="toc-text">安装KubeAdm</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#添加KubeAdm源"><span class="toc-number">3.1.</span> <span class="toc-text">添加KubeAdm源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-number">3.2.</span> <span class="toc-text">安装</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#初始化Master节点"><span class="toc-number">4.</span> <span class="toc-text">初始化Master节点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Kubectl访问K8s"><span class="toc-number">4.1.</span> <span class="toc-text">Kubectl访问K8s</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装flannel网络插件"><span class="toc-number">4.2.</span> <span class="toc-text">安装flannel网络插件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#加入Node节点"><span class="toc-number">5.</span> <span class="toc-text">加入Node节点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试集群"><span class="toc-number">6.</span> <span class="toc-text">测试集群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建deployment"><span class="toc-number">6.1.</span> <span class="toc-text">创建deployment</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#暴露service"><span class="toc-number">6.2.</span> <span class="toc-text">暴露service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#访问Service"><span class="toc-number">6.3.</span> <span class="toc-text">访问Service</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装Dashboard"><span class="toc-number">7.</span> <span class="toc-text">安装Dashboard</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#获取部署yaml文件"><span class="toc-number">7.1.</span> <span class="toc-text">获取部署yaml文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改yaml文件"><span class="toc-number">7.2.</span> <span class="toc-text">修改yaml文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#修改镜像"><span class="toc-number">7.2.1.</span> <span class="toc-text">修改镜像</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#修改Service暴露方式"><span class="toc-number">7.2.2.</span> <span class="toc-text">修改Service暴露方式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建SA"><span class="toc-number">7.3.</span> <span class="toc-text">创建SA</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"Kubeadm搭建K8s环境　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/11/13/docker/" title="上一篇: Docker">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/10/03/one-year/" title="下一篇: 博客一周年了">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

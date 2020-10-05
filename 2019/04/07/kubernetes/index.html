@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="Kubernetes是Google开源的容器编排引擎，是Google内部Borg系统的开源版本，是现在十分火热的技术，堪比之前的Hadoop和OpenStack。源代码开源在Github，是CNCF云原生基金会的第一个毕业项目，开启了云原生时代。本文是Kubernetes的入门。">
+<meta name="keywords" content="K8s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes">
+<meta property="og:url" content="https://ruanzz.github.io/2019/04/07/kubernetes/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="Kubernetes是Google开源的容器编排引擎，是Google内部Borg系统的开源版本，是现在十分火热的技术，堪比之前的Hadoop和OpenStack。源代码开源在Github，是CNCF云原生基金会的第一个毕业项目，开启了云原生时代。本文是Kubernetes的入门。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes">
+<meta name="twitter:description" content="Kubernetes是Google开源的容器编排引擎，是Google内部Borg系统的开源版本，是现在十分火热的技术，堪比之前的Hadoop和OpenStack。源代码开源在Github，是CNCF云原生基金会的第一个毕业项目，开启了云原生时代。本文是Kubernetes的入门。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Kubernetes | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-kubernetes" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/04/07/kubernetes/" class="article-date">
+      <time datetime="2019-04-07T13:12:47.000Z" itemprop="datePublished">2019-04-07</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Kubernetes
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/云计算/">云计算</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/K8s/">K8s</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>Kubernetes是Google开源的容器编排引擎，是Google内部Borg系统的开源版本，是现在十分火热的技术，堪比之前的Hadoop和OpenStack。源代码开源在Github，是CNCF云原生基金会的第一个毕业项目，开启了云原生时代。本文是Kubernetes的入门。<br><a id="more"></a></p>
+<p>Kubernetes简称k8s，k和s中间有8个单词所以简称k8s，Kubernetes采用Go语言开发，一般Kubernetes使用的容器技术有Docker或者rkt，Docker也是Go语言开发的，而且更加有意思的是Go语言本身也是用Go来写的，Go目前在云计算、中间件、区块链等领域疯狂的攻城略地,可以预见在不久的将来，Go将会成为主流语言。</p>
+<p>在正式进入Kubernetes之前，首先得来了解一下Docker，Docker目前是很多公司都拥抱的技术，可以在开发、测试、运维阶段都保证环境一致，并且很容易通过编排引擎来调度容器，这个是后话。</p>
+<h2 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h2><p>Docker是一种轻量级的虚拟化技术，是在操作系统级别虚拟化，各个容器之间共享操作系统资源，每个容器都是操作系统的一个进程，通过CGroup和NameSpace技术来达到资源的限制以及隔离，和虚拟机相比，隔离的不是很彻底，所以安全性一直被诟病，但是这个不影响它的欢迎程度，基本的计算、存储、网络资源隔离都是不错的，并且启动一个容器是秒级的，虚拟机是分钟级，所以容器可以在秒级别进行动态扩容和释放，这个和云最初的设想完全吻合，也是容器大受欢迎的原因。</p>
+<p>我的环境是OS X系统，可以直接通过<code>brew cask install docker</code>来安装Docker，其他的平台可以参考官方文档来安装，Docker是C/S架构，安装完成之后命令行客户端就完成了，启动服务端之后就可以通过客户端来与后台的dockerd进程来通信了。客户端的话是通过<code>docker</code>命令进行交互，与服务端通信也是通过的客户端发送命令，然后由客户端与服务端进行通信，通过命令<code>docker info</code>可以查看Docker服务端的信息。</p>
+<p>Docker主要是三大块的内容:容器，镜像，仓库，这三个最主要的是镜像，其他两个跟镜像有关，像仓库就是存储镜像的地方，容器是从镜像来启动的，镜像也是我们开发人员来重点关注和维护的，之前我们的打包出来给运维人员是一个jar包或者war包，现在我们打包出来的是镜像，直接push到我们内部搭建的仓库中，测试和运维直接从仓库中拉取镜像来启动容器即可，这就保证了开发，测试，运维的环境一致。</p>
+<p>镜像的构建由开发人员来维护，构建Docker镜像需要Dockerfile文件，这个就是构建Docker镜像的描述文件，这里边有一系列的语法，这里不做赘述，下面我们来看一下Dockerfile.<br><figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> daocloud.io/nginx</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> html/* /usr/share/nginx/html</span></span><br></pre></td></tr></table></figure></p>
+<p>第一行是<code>FROM</code>开头，表示从哪个镜像开始构建，这里是以<code>daocloud.io/nginx</code>为原始镜像，第二行是<code>COPY</code>拷贝<code>html</code>这个文件夹的文件到原始镜像的html文件夹中，这样子就会新构建了一层镜像，这就要求在Dockerfile同级目录下有一个html文件夹，html文件夹下有一个文件index.html。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  html more index.html </span><br><span class="line">&lt;h1&gt;Hello Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure></p>
+<p>接下来我们使用<code>docker build -t nginx-demo .</code> 来构建镜像，镜像名为<code>nginx-demo</code> ，<code>.</code>代表的是构建的上下文环境，这样子就可以直接找到html文件夹，一般这个上下文环境只要包含我们必须的文件，不然构建镜像会相当的慢。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">➜  demo docker build -t nginx-demo .</span><br><span class="line">Sending build context to Docker daemon  3.584kB</span><br><span class="line">Step 1/2 : FROM daocloud.io/nginx</span><br><span class="line">latest: Pulling from nginx</span><br><span class="line">Digest: sha256:dabecc7dece2fff98fb00add2f0b525b7cd4a2cacddcc27ea4a15a7922ea47ea</span><br><span class="line">Status: Downloaded newer image for daocloud.io/nginx:latest</span><br><span class="line"><span class="meta"> ---&gt;</span><span class="bash"> 2bcb04bdb83f</span></span><br><span class="line">Step 2/2 : COPY html/* /usr/share/nginx/html</span><br><span class="line"><span class="meta"> ---&gt;</span><span class="bash"> 2289cd357a0e</span></span><br><span class="line">Successfully built 2289cd357a0e</span><br><span class="line">Successfully tagged nginx-demo:latest</span><br></pre></td></tr></table></figure></p>
+<p>这是构建的过程，非常的清晰，每一步都会生成一层镜像，第一步就是拉镜像，生成第一次层，id为2bcb04bdb83f，第二步是拷贝，生成第二层，id为2289cd357a0e，最后生成了镜像nginx-demo:latest，如果没有指定镜像标签的，默认的是latest，实际开发中一般是要指定tag的，tag就是对应的版本。好了，我们通过命令<code>docker image ls</code>来查看一下镜像信息<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  demo docker image ls</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx-demo          latest              2289cd357a0e        5 minutes ago       109MB</span><br><span class="line">daocloud.io/nginx   latest              2bcb04bdb83f        11 days ago</span><br></pre></td></tr></table></figure></p>
+<p>接下来就是启动容器<code>docker run --name nginx-80 -d -p 8080:80 nginx-demo</code>,指定容器名称为nginx-80，<code>-d</code>是指后台运行，<code>-p</code>指的是端口映射，将Docker Host的8080端口映射到容器的80端口，<code>nginx-demo</code>是镜像名，即这个容器是通过<code>nginx-demo</code>这个镜像来启动的。启动成功之后命令返回的是容器的长id，然后我们通过访问nginx来看看效果<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  demo curl http://127.0.0.1:8080</span><br><span class="line">&lt;h1&gt;Hello Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure></p>
+<p>好了，Docker我们暂时就说到这了，Docker本身是一个相对底层的容器引擎，和KVM，Xen这种属于同一级别的东西，现实中我们不可能直接这样子操作，像KVM有一个OpenStack云平台来管理操作，那是正常人使用的东西，像这种用命令行一个一个启动容器的对用户不太友好，而且调度也不方便。所以我们来看看今天的主角Kubernetes。</p>
+<h2 id="Kubernetes架构"><a href="#Kubernetes架构" class="headerlink" title="Kubernetes架构"></a>Kubernetes架构</h2><p>先从大的方面来了解一下Kubernetes，Kubernetes集群包含一个master节点和多个node节点，master是控制集群的中心，运行有多个服务，包括面向用户的API Server,负责维护集群状态的Controller Manager，负责调度任务的Scheduler。node是提供CPU，内存和存储资源的节点，每个node节点运行这kubelet和kube-proxy，kubelet是一个agent客户端，负责维护node节点的运行状态以及和master进行通信，kube-proxy主要是实现集群网络服务。</p>
+<p>这个可以从Kubernetes的官方网站去了解，而且官方文档的还有一个特别棒的就是可以实时交互一个k8s集群，这样子就可以一边看Tutorial文档，一边实际操作，跟着文档做一遍下来就会对Kubernetes比较清晰了，这里要赞一下官方文档，真的写的很清晰，我的渣渣英语水平都可以很顺畅看完整个Tutorial。</p>
+<h2 id="搭建Kubernetes集群"><a href="#搭建Kubernetes集群" class="headerlink" title="搭建Kubernetes集群"></a>搭建Kubernetes集群</h2><p>我们这里不是真实的生产环境，真实的生产环境搭建还是根据官方文档来参考搭建，我们是试验一个东西，官方文档推荐使用Minikub来搭建一个单节点的集群来做开发测试，当然，如果资源足够的话还是搭建一个完整的真实集群。</p>
+<p>先来安装客户端kubectl，这个可以跟Kubernetes集群通信,还有Minikube也一起安装<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">brew install kubectl</span><br><span class="line">brew cask install minikube</span><br></pre></td></tr></table></figure></p>
+<p>安装完成之后我们来安装一个单节点的k8s集群，使用VirtualBox来做虚拟层。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minikube start --vm-driver virtualbox</span><br></pre></td></tr></table></figure></p>
+<p>运行命令之后我们打开VirtualBox看到已经自动创建了一台虚拟机，并且开始安装相关的服务，因为这个是单节点，master和node都是它，所以服务还是有点多的，等待的时间会比较长，如果安装失败了，删掉再重来即可，运行命令<code>minikube delete</code>会把虚拟机删掉重新，然后再重新安装，生成新的虚拟机来安装即可。</p>
+<p>安装完成之后minikube会自动配置kubectl，把它指向k8s的API服务，运行命令<code>kubectl config current-context</code>查看<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  html kubectl config current-context</span><br><span class="line">minikube</span><br></pre></td></tr></table></figure></p>
+<p>这样子我们就可以使用kubectl和k8s集群通信了，安装好了集群之后我们可以通过命令<code>minikube start</code>和<code>minikube stop</code>来启动和停止集群。还要k8s提供了UI界面，通过命令<code>minikube dashboard</code>来打开，这样子就可以通过页面来操作编排了，但是作为一个开发人员，还是通过命令来和k8s集群通信比较舒服，下面我们就通过命令行来操作编排。</p>
+<h2 id="部署服务"><a href="#部署服务" class="headerlink" title="部署服务"></a>部署服务</h2><p>在部署之前，我们先将本地Docker客户端和k8s主机的Docker Host的服务端建立联系，运行命令<br><code>eval $(minikube docker-env)</code>,这样子就可以将二者关联起来，关联起来主要是是想构建镜像，模拟开发中的滚动的发布，这个实际开发中一般是通过的Jenkins来触发，我们为了简单就直接手动触发了。</p>
+<p>之前我们已经构建过镜像，不过是在本地，现在本地的docker客户端已经连到了k8s的Docker Host，这个时候是没有刚才我们构建的镜像，通过命令<code>docker build -t k8s-demo:0.1 .</code>构建，构建完成了再通过命令<code>docker image ls</code>可以看到<code>k8s-demo</code>这个镜像，tag是0.1。</p>
+<p>一般我们开发人员会写一个deployment.yml,描述如何进行部署<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata: </span><br><span class="line"> name: k8s-demo-deployment</span><br><span class="line">spec:</span><br><span class="line"> replicas: 3</span><br><span class="line"> template:</span><br><span class="line">  metadata:</span><br><span class="line">   labels:</span><br><span class="line">    app: k8s-demo</span><br><span class="line">  spec:</span><br><span class="line">   containers:</span><br><span class="line">    - name: k8s-demo-pod</span><br><span class="line">      image: k8s-demo:0.1</span><br><span class="line">      ports:</span><br><span class="line">       - containerPort: 80</span><br></pre></td></tr></table></figure></p>
+<p>这里边定义了部署的副本数是3个，每个部署都是一个pod，什么是pod？pod是k8s最小的资源调度单位，一般由多个container组成，这些container共享资源，还定义了container的相关信息，包括名称，使用的镜像以及容器端口。这样子我们通过命令来应用部署<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl create -f deployment.yml </span><br><span class="line">deployment.extensions/k8s-demo-deployment created</span><br></pre></td></tr></table></figure></p>
+<p>通过命令<code>kubectl get rs</code>来查看<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl get rs                  </span><br><span class="line">NAME                             DESIRED   CURRENT   READY   AGE</span><br><span class="line">k8s-demo-deployment-774878f86f   3         3         3       5m</span><br></pre></td></tr></table></figure></p>
+<p>然后查看pod相关信息，发现确实是3份<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl get pods</span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">k8s-demo-deployment-774878f86f-ct8hj   1/1     Running   0          6m</span><br><span class="line">k8s-demo-deployment-774878f86f-gxrp7   1/1     Running   0          6m</span><br><span class="line">k8s-demo-deployment-774878f86f-v77hl   1/1     Running   0          6m</span><br></pre></td></tr></table></figure></p>
+<p>Kubernetes会一直帮我们维护pod的数量为3，我们假设其中的一个pod挂了，看看会不会k8s会不会立即启动一个pod<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl get pods</span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">k8s-demo-deployment-774878f86f-ct8hj   1/1     Running   0          6m</span><br><span class="line">k8s-demo-deployment-774878f86f-gxrp7   1/1     Running   0          6m</span><br><span class="line">k8s-demo-deployment-774878f86f-v77hl   1/1     Running   0          6m</span><br><span class="line">➜  k8s kubectl delete pod k8s-demo-deployment-774878f86f-ct8hj</span><br><span class="line">pod "k8s-demo-deployment-774878f86f-ct8hj" deleted</span><br><span class="line">➜  k8s kubectl get pods</span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">k8s-demo-deployment-774878f86f-gxrp7   1/1     Running   0          8m</span><br><span class="line">k8s-demo-deployment-774878f86f-kfhm7   1/1     Running   0          16s</span><br><span class="line">k8s-demo-deployment-774878f86f-v77hl   1/1     Running   0          8m</span><br></pre></td></tr></table></figure></p>
+<p>我们手动删了<code>k8s-demo-deployment-774878f86f-ct8hj</code>这个pod，然后k8s很快就起了一个新的pod<code>k8s-demo-deployment-774878f86f-kfhm7</code>来保证数量为3，这就非常完美了，这样子线上环境中某个节点挂了，那么k8s就可以帮我们快速的新建一个pod来维持数量，这样子就不会如果支撑不住，导致整个集群挂掉，那这可就惨了。</p>
+<p>既然容器起来了，那我们访问一下nginx，现在容器是在k8s内部起来了，并没有做端口映射，所以目前我们还访问不到，k8s是通过service来做映射访问的，我们来看一下service定义文件serivce.yml<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s more service.yml </span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line"> name: k8s-demo-service</span><br><span class="line"> labels:</span><br><span class="line">  app: k8s-demo</span><br><span class="line">spec:</span><br><span class="line"> type: NodePort</span><br><span class="line"> ports:</span><br><span class="line">  - port: 80</span><br><span class="line">    nodePort: 30050</span><br><span class="line"> selector:</span><br><span class="line">  app: k8s-demo</span><br></pre></td></tr></table></figure></p>
+<p>重点关注selector，这里将会把label为<code>app: k8s-demo</code>的容器的80端口映射到node节点的30050端口，我们刚才的deployment.yml文件中定义的label就是<code>app: k8s-demo</code>,也可以看一下现在的运行的pod的描述<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl describe pod k8s-demo-deployment-774878f86f-gxrp7</span><br><span class="line">Name:           k8s-demo-deployment-774878f86f-gxrp7</span><br><span class="line">Namespace:      default</span><br><span class="line">Node:           minikube/10.0.2.15</span><br><span class="line">Start Time:     Sun, 07 Apr 2019 18:05:29 +0800</span><br><span class="line">Labels:         app=k8s-demo</span><br><span class="line">                pod-template-hash=3304349429</span><br><span class="line">Annotations:    &lt;none&gt;</span><br><span class="line">Status:         Running</span><br><span class="line">IP:             172.17.0.6</span><br><span class="line"></span><br><span class="line">.....</span><br></pre></td></tr></table></figure></p>
+<p>通过命令<code>kubectl create -f service.yml</code>来创建service<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl create -f service.yml</span><br><span class="line">service/k8s-demo-service created</span><br></pre></td></tr></table></figure></p>
+<p>然后通过这个service把endpoint暴露出来<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s minikube service k8s-demo-service --url</span><br><span class="line">http://192.168.99.100:30050</span><br></pre></td></tr></table></figure></p>
+<p>访问这个url<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s curl http://192.168.99.100:30050</span><br><span class="line">&lt;h1&gt;Hello Docker&lt;/h1&gt;</span><br></pre></td></tr></table></figure></p>
+<p>跟我们本地构建镜像启动容器访问的时候看到的是一样，只是这个端口映射我们是写成了yml配置文件，而本地镜像是启动容器的时候指定的。</p>
+<p>好了，到目前为止，我们已经部署了一个服务实例，回过头来看看，这个和我们本地启动容器有什么区别，或者优势在哪里？咋一看好像还变复杂了，看起来是复杂了，但其实对于运维人员来说变得相当简单了，而且这样子更加的规范，也更加的灵活了，还有很重要的一点就是比较符合现在大多数的部署场景。</p>
+<p>梳理一下流程，开发人员写代码的时候一般源代码下边都会有一个Dockerfile文件，这样子每次提交代码的时候都会触发Jenkins来构建镜像并push到我们内部搭建私有仓库中，并且配套有deployment.yml和service.yml文件，做完了CI之后，接下来就是CD的过程，触发k8s应用这两个文件来完成滚动更新部署。这样子运维人员只需要点击一下发布按钮来触发，开发人员通过提交代码来触发，自动完成这个CI/CD过程，整个过程所需要关心的就是Dockerfile，deployment.yml,service.yml这三个文件，这么说来是不是觉得非常轻松了，而且运维还不用担心应用什么时候挂了，有了k8s，假期期间再也没有接到夺命连环call了。</p>
+<p>Kubernetes确实非常好用，应用场景也会越来越多，目前我们内部的平台就只是用来做CI/CD，有些公司也用来搭建深度学习平台等等，以后肯定也会越来越多，但是k8s帮我们做了很多内部的事情，这个还是比较有分量，用好它也不是一件容易的事。我们已经部署出来了一个服务，下面我们来看看滚动更新，这样子就完整的介绍了CI/CD的这个场景下使用k8s。</p>
+<h2 id="滚动更新"><a href="#滚动更新" class="headerlink" title="滚动更新"></a>滚动更新</h2><p>假设我们修改了代码，我们这里就修改index.html的内容，方便做对比<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  html more index.html </span><br><span class="line">&lt;h1&gt;Hello Kubernetes&lt;/h1&gt;</span><br></pre></td></tr></table></figure></p>
+<p>接下来就是提交代码自动构建镜像，这里我们手动构建,tag修改为0.2<br>接下来我们需要修改一下deployment.yml这个文件来适配滚动跟新<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata: </span><br><span class="line"> name: k8s-demo-deployment</span><br><span class="line">spec:</span><br><span class="line"> replicas: 3</span><br><span class="line"> minReadySeconds: 10</span><br><span class="line"> strategy:</span><br><span class="line">  type: RollingUpdate</span><br><span class="line">  rollingUpdate:</span><br><span class="line">   maxUnavailable: 1</span><br><span class="line">   maxSurge: 1</span><br><span class="line"> template:</span><br><span class="line">  metadata:</span><br><span class="line">   labels:</span><br><span class="line">    app: k8s-demo</span><br><span class="line">  spec:</span><br><span class="line">   containers:</span><br><span class="line">    - name: k8s-demo-pod</span><br><span class="line">      image: k8s-demo:0.2</span><br><span class="line">      ports:</span><br><span class="line">       - containerPort: 80</span><br></pre></td></tr></table></figure></p>
+<p>主要是增加滚动跟新的配置，如果一开始就有的话保持原样不用修改，<code>minReadySeconds: 10</code>指在更新了一个pod之后，需要在它进入正常状态10秒之后再更新下一个pod，<code>maxUnavailable: 1</code>指同时处于不可用状态pod不能超过1个，<code>maxSurge: 1</code>指多余的pod不能超过一个，这样子Kubernetes就会逐个替换所有的pod，运行命令<code>kubectl apply -f deployment.yml --record=true</code>来滚动更新，这里<code>--record=true</code>是让Kubernetes把这行命令记录到发布历史中备查<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl apply -f deployment.yml --record=true</span><br><span class="line">deployment.extensions/k8s-demo-deployment configured</span><br><span class="line">➜  k8s kubectl get pods</span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">k8s-demo-deployment-774878f86f-gxrp7   1/1     Running   0          1h</span><br><span class="line">k8s-demo-deployment-774878f86f-v77hl   1/1     Running   0          1h</span><br><span class="line">k8s-demo-deployment-86dbd79ff6-g45m8   1/1     Running   0          5s</span><br><span class="line">k8s-demo-deployment-86dbd79ff6-mkxbx   1/1     Running   0          5s</span><br></pre></td></tr></table></figure></p>
+<p>可以看到当前正在pod正在替换，使用命令<code>kubectl rollout status deployment k8s-demo-deployment</code>可以实时查看更新状态，但是更新太快了，不太方便。但是我们可以看一下pod的age，<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  k8s kubectl get pods                                     </span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">k8s-demo-deployment-86dbd79ff6-5l8gz   1/1     Running   0          22s</span><br><span class="line">k8s-demo-deployment-86dbd79ff6-g45m8   1/1     Running   0          34s</span><br><span class="line">k8s-demo-deployment-86dbd79ff6-mkxbx   1/1     Running   0          34s</span><br></pre></td></tr></table></figure></p>
+<p>之前都是1h左右，现在是几十秒，说明是新建的，我们来验证一下：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  demo curl http://192.168.99.100:30050</span><br><span class="line">&lt;h1&gt;Hello Kubernetes&lt;/h1&gt;</span><br></pre></td></tr></table></figure></p>
+<p>确实修改了，到这里我们就完整的讲述了CI/CD的整个流程。</p>
+<p>到这里我们基本上把Kubernetes用起来，但是还有很多的东西值得我们去学习，官网的文档就是最好的学习资料，这里还要再次赞美Kubernetes的官方文档，真的真的写的非常通俗易懂。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/04/07/kubernetes/">Kubernetes</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-04-07, 13:12:47</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/04/07/kubernetes/" title="Kubernetes">https://ruanzz.github.io/2019/04/07/kubernetes/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/04/07/kubernetes/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/04/13/sso/">
+                    单点登录
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/04/01/rabbitmq/">
+                    RabbitMQ
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker"><span class="toc-number">1.</span> <span class="toc-text">Docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kubernetes架构"><span class="toc-number">2.</span> <span class="toc-text">Kubernetes架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#搭建Kubernetes集群"><span class="toc-number">3.</span> <span class="toc-text">搭建Kubernetes集群</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#部署服务"><span class="toc-number">4.</span> <span class="toc-text">部署服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#滚动更新"><span class="toc-number">5.</span> <span class="toc-text">滚动更新</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"Kubernetes　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/04/13/sso/" title="上一篇: 单点登录">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/04/01/rabbitmq/" title="下一篇: RabbitMQ">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

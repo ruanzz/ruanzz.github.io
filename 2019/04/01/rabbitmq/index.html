@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="目前大部分的后台系统都引入了MQ，不管是ActiveMQ还是RabbitMQ，亦或是RocketMQ、Kafka等等，MQ的主要作用是对系统进行解耦、异步化以及削峰，解耦应该是最常用的场景，本文将围绕这一业务场景以RabbitMQ作为案例来进行阐述。">
+<meta name="keywords" content="MQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ">
+<meta property="og:url" content="https://ruanzz.github.io/2019/04/01/rabbitmq/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="目前大部分的后台系统都引入了MQ，不管是ActiveMQ还是RabbitMQ，亦或是RocketMQ、Kafka等等，MQ的主要作用是对系统进行解耦、异步化以及削峰，解耦应该是最常用的场景，本文将围绕这一业务场景以RabbitMQ作为案例来进行阐述。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/add_user.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/add_host.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/user_host.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model1.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model1_send.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model1_recv.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model2.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model2_recv1.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model2_recv2.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model2_send.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model3.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model3_recv1.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model3_recv2.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model3_send.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model4.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model4_bind.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model4_recv1.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model4_recv2.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model5.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model5_bind.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model5_recv1.png">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/rabbitmq/model5_recv2.png">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMQ">
+<meta name="twitter:description" content="目前大部分的后台系统都引入了MQ，不管是ActiveMQ还是RabbitMQ，亦或是RocketMQ、Kafka等等，MQ的主要作用是对系统进行解耦、异步化以及削峰，解耦应该是最常用的场景，本文将围绕这一业务场景以RabbitMQ作为案例来进行阐述。">
+<meta name="twitter:image" content="https://ruanzz.github.io/asset/img/rabbitmq/add_user.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>RabbitMQ | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-rabbitmq" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/04/01/rabbitmq/" class="article-date">
+      <time datetime="2019-04-01T22:42:42.000Z" itemprop="datePublished">2019-04-01</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RabbitMQ
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Web/">Web</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MQ/">MQ</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>目前大部分的后台系统都引入了MQ，不管是ActiveMQ还是RabbitMQ，亦或是RocketMQ、Kafka等等，MQ的主要作用是对系统进行解耦、异步化以及削峰，解耦应该是最常用的场景，本文将围绕这一业务场景以RabbitMQ作为案例来进行阐述。<br><a id="more"></a></p>
+<h2 id="认识MQ"><a href="#认识MQ" class="headerlink" title="认识MQ"></a>认识MQ</h2><p>MQ的全称为Message Queue，中文翻译为消息队列，Java中定义了一系列的接口规范，这套规范叫做JMS，像ActiveMQ就是遵循JMS规范，我之前也用过一段时间的ActiveMQ，由于系统没有什么并发压力，数据量也不大，ActiveMQ确实也挺适合的，但是ActiveMQ更新速度太慢了，我想主要的原因是官方觉得比较成熟了吧。</p>
+<p>接下来讲讲今天的主角，RabbitMQ也属于消息队列，但是它是用Erlang写的，所以谈不上遵循JMS规范，RabbitMQ遵循的是AMQP协议，AMQP协议是一个提供统一消息服务的的应用层标准的消息队列协议，不受语言限制，由于底层使用的是专门面向并发的Erlang语言，所以RabbitMQ的吞吐量非常优秀，而且目前社区非常活跃，基本上现在的微服务系统都是通过集成RabbitMQ来作为消息传递的。</p>
+<p>这两者有什么区别呢？JMS定义了统一的接口来对消息操作，而且限定语言为Java；AMQP只是协议，不规定实现方式，不受语言限制，通过规定协议来统一数据交互的格式。</p>
+<p>至于MQ的选型本文不做讨论，本文的主角是RabbitMQ，前面说过，MQ的常用场景是用来解耦，下面来看看两个我工作中的真实场景。</p>
+<p>我是做云平台业务的，当底层对云资源做了修改之后，云平台是不知道底层做了修改，这时候怎么能让云平台知道呢？一般有两种方案，一种是底层对云资源做了修改之后，调云平台的修改接口，还有一种就是底层做了修改之后发布消息到消息队列，云平台去订阅消息。第二种方案很好的将云平台和底层进行了解耦，这种场景不是很频繁，底层的东西不会经常变动，这个是不符合原来的平台的设计原则的，消息吞吐量不大，ActiveMQ完全能够胜任。</p>
+<p>还有一个业务场景是的云平台部署了一个云资源，部署完成了之后底层需要告知云平台已经部署完成，云平台才能做后续的事情，比如结束相关订单，生成服务实例来进行计费，报表开始将该资源纳入统计，通知监控平台纳管该资源进行监控，发送邮件，短信通知等等一系列相关的事情，如果都是在单体系统中还好，大不了都调一遍接口，或者和上一个场景中一样直接使用ActiveMQ，分不同的主题来订阅到不同的消息触发不同的逻辑操作，如果使用ActiveMQ的话这个时候消息吞吐量是相对比较大的，特别是目前架构已经演变成微服务架构了，不应该还采用之前的技术，应该全面拥抱微服务全套解决方案，微服务主要用的MQ就是RabbitMQ，而且RabbitMQ中的高级消息模型就可以满足我们上面的第二个业务场景，吞吐量也是完全Hold的住。</p>
+<h2 id="安装配置"><a href="#安装配置" class="headerlink" title="安装配置"></a>安装配置</h2><p>因为RabbitMQ是有Erlang写的，安装之前需要安装相关依赖，这个可以参考官方文档来进行安装，我的是OS X系统，官方推荐直接通过<code>brew install rabbitmq</code>即可，这个最好要打开VPN，因为有些资源是挂在国外，brew已经处理好了依赖关系，等待安装完成即可。</p>
+<p>安装完成之后通过命令<code>brew services start rabbitmq</code>，启动成功之后访问<code>http://127.0.0.1:15672</code>，使用默认用户名密码<code>guest/guest</code>登录，guest这个账户是RabbitMQ默认的管理员账户，拥有最高的权利，生产环境一般会新添加一个用户，赋予新用户管理员权限，然后把guest这个默认用户删除掉，这里只是我本地的环境，不用考虑安全因素。</p>
+<p>接下来我们创建一个demo用户，并且给demo用户一个虚拟主机，这个虚拟主机待会试验的时候会用到。</p>
+<p><img src="/asset/img/rabbitmq/add_user.png" alt="添加用户"><br><img src="/asset/img/rabbitmq/add_host.png" alt="添加host"></p>
+<p>然后去用户详情或者host详情里边做好两者的关联，这里从用户这里进入</p>
+<p><img src="/asset/img/rabbitmq/user_host.png" alt="添加关联"></p>
+<p>这样子我们基本就完成了前期准备，下面来介绍消息模型。</p>
+<h2 id="消息模型"><a href="#消息模型" class="headerlink" title="消息模型"></a>消息模型</h2><h3 id="基本消息模型"><a href="#基本消息模型" class="headerlink" title="基本消息模型"></a>基本消息模型</h3><p>基本消息模型如下图所示，生产者将消息发送到消息队列中，消费者从消息队列获取消息，消息存储在队列里。<br><img src="/asset/img/rabbitmq/model1.png" alt="基本消息模型"></p>
+<p>Consumer:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Consumer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String QUEUE_NAME = <span class="string">"simple_queue"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">// 1.获取到连接</span></span><br><span class="line">    Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">    <span class="comment">// 2.创建通道</span></span><br><span class="line">    Channel channel = connection.createChannel();</span><br><span class="line">    <span class="comment">// 3.声明队列</span></span><br><span class="line">    channel.queueDeclare(QUEUE_NAME, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line">    <span class="comment">// 4.定义队列的消费者</span></span><br><span class="line">    DefaultConsumer consumer = <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">      <span class="comment">// 获取消息，并且处理，这个方法类似事件监听，如果有消息的时候，会被自动调用</span></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// body 即消息体</span></span><br><span class="line">        String msg = <span class="keyword">new</span> String(body);</span><br><span class="line">        System.out.println(<span class="string">" [Simple] received : "</span> + msg + <span class="string">"!"</span>);</span><br><span class="line">        <span class="comment">// 手动进行ACK</span></span><br><span class="line">        <span class="comment">//channel.basicAck(envelope.getDeliveryTag(), false);</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// 监听队列，第二个参数：是否自动进行消息确认,false要进行手动确认，保证消息的可靠性</span></span><br><span class="line">    channel.basicConsume(QUEUE_NAME, <span class="keyword">true</span>, consumer);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Producer：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Producer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String QUEUE_NAME = <span class="string">"simple_queue"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">// 1.获取到连接</span></span><br><span class="line">    Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">    <span class="comment">// 2.创建通道</span></span><br><span class="line">    Channel channel = connection.createChannel();</span><br><span class="line">    String message = <span class="string">"Hello World!"</span>;</span><br><span class="line">    <span class="comment">// 3.向队列发送消息</span></span><br><span class="line">    channel.basicPublish(<span class="string">""</span>, QUEUE_NAME, <span class="keyword">null</span>, message.getBytes());</span><br><span class="line">    System.out.println(<span class="string">" [Simple] Sent '"</span> + message + <span class="string">"'"</span>);</span><br><span class="line">    <span class="comment">// 4.关闭通道和连接</span></span><br><span class="line">    channel.close();</span><br><span class="line">    connection.close();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Console:<br><img src="/asset/img/rabbitmq/model1_send.png" alt="发送"></p>
+<p><img src="/asset/img/rabbitmq/model1_recv.png" alt="接收"></p>
+<p>RabbitMQ中为了确保消息已经被消费了，会有一个确认机制来控制，可以设置为自动确认，如果想自己控制，可以设置为false之后手动进行确认，总之，消息确认机制从消费者端保证了消息被成功消费。</p>
+<h3 id="work消息模型"><a href="#work消息模型" class="headerlink" title="work消息模型"></a>work消息模型</h3><p>当生产者产生消息比较多的时候，这就造成队列里边堆积了大量消息，这对系统来说是一个潜在的负担，这个时候就可以考虑work消息模型，多个消费者订阅同一个消息队里，多个消费者共享消息队列里的任务，但是一个消息只能由一个消费者消费。<br><img src="/asset/img/rabbitmq/model2.png" alt="work消息模型"></p>
+<p>代码基本上和基本消息类型大同小异，完整代码见仓库中work包，生产者发送了50个任务，两个消费者消费消息,但是不是轮流来消费，看处理能力，只保证一个消息只会被消费一次！<br>Consumer-1:<br><img src="/asset/img/rabbitmq/model2_recv1.png" alt="Consumer-1"><br>Consumer-2:<br><img src="/asset/img/rabbitmq/model2_recv2.png" alt="Consumer-2"><br>Producer:<br><img src="/asset/img/rabbitmq/model2_send.png" alt="Producer"></p>
+<h3 id="发布-订阅模型"><a href="#发布-订阅模型" class="headerlink" title="发布/订阅模型"></a>发布/订阅模型</h3><p>生产者产生消息，将消息发送到交换机，每个消费者都有自己的队列，队列连接到交换机，由交换机决定发送到哪个队列中，这样子可以实现一条消息可以被多个消费者消费。<br><img src="/asset/img/rabbitmq/model3.png" alt="发布订阅模型"></p>
+<p>完整代码见仓库中publish包，两个消费者所在的队列绑定到同一个交换机上，生产者发送消息到交换机的时候两个队列都会收到消息，如果没有队列连接到交换机，那么消息将丢失。<br>Consumer-1:<br><img src="/asset/img/rabbitmq/model3_recv1.png" alt="Consumer-1"><br>Consumer-2:<br><img src="/asset/img/rabbitmq/model3_recv2.png" alt="Consumer-2"><br>Producer:<br><img src="/asset/img/rabbitmq/model3_send.png" alt="Producer"></p>
+<h3 id="路由模型"><a href="#路由模型" class="headerlink" title="路由模型"></a>路由模型</h3><p>生产者产生消息，发送消息到交换机，交换机类为direct，这样子交换机就会根据配置的路由向指定的队列发送消息，而不会像所有连接到交换机的队列都发送消息，所以消息队列需要绑定一个routing key,生产发送消息的时候需要指定routing key，这样子就可以匹配上了。<br><img src="/asset/img/rabbitmq/model4.png" alt="路由模型"></p>
+<p>完整代码见仓库中route包，两个消费者所在队列绑定到同一个交换机上，并且指定了routingKey，如图所示<br><img src="/asset/img/rabbitmq/model4_bind.png" alt="绑定形式"><br>生产者先发送routingKey为update，然后发送routingKey为delete,如图所示，与我们预期的结果一样。<br>Consumer-1:<br><img src="/asset/img/rabbitmq/model4_recv1.png" alt="Consumer-1"><br>Consumer-2:<br><img src="/asset/img/rabbitmq/model4_recv2.png" alt="Consumer-2"> </p>
+<h3 id="主题模型"><a href="#主题模型" class="headerlink" title="主题模型"></a>主题模型</h3><p>路由模型是主题模型的一个特例，路由模型中的routing key是一个全匹配的key值，主题模型中key支持通配符，其中<code>#</code>匹配一个或多个值，<code>*</code>匹配不多不少一个词。<br><img src="/asset/img/rabbitmq/model5.png" alt="主题模型"><br>完整代码见仓库中topic包，两个消费者所在队列绑定到同一个交换机，Consumer-1的routingKey为item.#,Consumer-2的routingKey为item.*，如图所示<br><img src="/asset/img/rabbitmq/model5_bind.png" alt="绑定形式"><br>生产者先发送routingKey为item.delete，然后发送routingKey为item.delete.test,如图所示，与我们预期的结果一样。<br>Consumer-1:<br><img src="/asset/img/rabbitmq/model5_recv1.png" alt="Consumer-1"><br>Consumer-2:<br><img src="/asset/img/rabbitmq/model5_recv2.png" alt="Consumer-2"> </p>
+<h2 id="SpringBoot集成"><a href="#SpringBoot集成" class="headerlink" title="SpringBoot集成"></a>SpringBoot集成</h2><p>SpringBoot是有AMQP-starter的，引入SpringBoot项目即可，然后在application.yml中配置RabbitMQ的信息，接下来就是写一个listener即可，真的是太方便了，完整代码见仓库spring包，运行ListenerTest即可验证。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Listener</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RabbitListener</span>(bindings = <span class="meta">@QueueBinding</span>(</span><br><span class="line">      value = <span class="meta">@Queue</span>(value = <span class="string">"exchange.spring.queue"</span>, durable = <span class="string">"true"</span>),</span><br><span class="line">      exchange = <span class="meta">@Exchange</span>(</span><br><span class="line">          value = <span class="string">"exchange.spring"</span>,</span><br><span class="line">          ignoreDeclarationExceptions = <span class="string">"true"</span>,</span><br><span class="line">          type = ExchangeTypes.TOPIC</span><br><span class="line">      ),</span><br><span class="line">      key = &#123;<span class="string">"#.#"</span>&#125;))</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">listen</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      TimeUnit.MINUTES.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">"接收到消息："</span> + msg);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后，附上仓库地址</p>
+<div class="github-widget" data-repo="ruanzz/RabbitMQ-Tutorial"></div>
+
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/04/01/rabbitmq/">RabbitMQ</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-04-01, 22:42:42</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/04/01/rabbitmq/" title="RabbitMQ">https://ruanzz.github.io/2019/04/01/rabbitmq/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/04/01/rabbitmq/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/04/07/kubernetes/">
+                    Kubernetes
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/31/restful/">
+                    RESTful API
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#认识MQ"><span class="toc-number">1.</span> <span class="toc-text">认识MQ</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装配置"><span class="toc-number">2.</span> <span class="toc-text">安装配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息模型"><span class="toc-number">3.</span> <span class="toc-text">消息模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本消息模型"><span class="toc-number">3.1.</span> <span class="toc-text">基本消息模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#work消息模型"><span class="toc-number">3.2.</span> <span class="toc-text">work消息模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#发布-订阅模型"><span class="toc-number">3.3.</span> <span class="toc-text">发布/订阅模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#路由模型"><span class="toc-number">3.4.</span> <span class="toc-text">路由模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#主题模型"><span class="toc-number">3.5.</span> <span class="toc-text">主题模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringBoot集成"><span class="toc-number">4.</span> <span class="toc-text">SpringBoot集成</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"RabbitMQ　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/04/07/kubernetes/" title="上一篇: Kubernetes">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/31/restful/" title="下一篇: RESTful API">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

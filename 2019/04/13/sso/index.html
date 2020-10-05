@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="单点登录应该是大部分公司都有的一个系统，这个系统的作用就是用户只需登录一次就可以在多个系统之间切换而不用重新登录。刚毕业的时候接触过点单点登录，不过久了有点忘了，这篇文章来讲述单点登录相关知识点，并且根据两种主流实现方式CAS和JWT来讲解。">
+<meta name="keywords" content="sso">
+<meta property="og:type" content="article">
+<meta property="og:title" content="单点登录">
+<meta property="og:url" content="https://ruanzz.github.io/2019/04/13/sso/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="单点登录应该是大部分公司都有的一个系统，这个系统的作用就是用户只需登录一次就可以在多个系统之间切换而不用重新登录。刚毕业的时候接触过点单点登录，不过久了有点忘了，这篇文章来讲述单点登录相关知识点，并且根据两种主流实现方式CAS和JWT来讲解。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="单点登录">
+<meta name="twitter:description" content="单点登录应该是大部分公司都有的一个系统，这个系统的作用就是用户只需登录一次就可以在多个系统之间切换而不用重新登录。刚毕业的时候接触过点单点登录，不过久了有点忘了，这篇文章来讲述单点登录相关知识点，并且根据两种主流实现方式CAS和JWT来讲解。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>单点登录 | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-sso" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/04/13/sso/" class="article-date">
+      <time datetime="2019-04-13T21:34:10.000Z" itemprop="datePublished">2019-04-13</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      单点登录
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Web/">Web</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sso/">sso</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>单点登录应该是大部分公司都有的一个系统，这个系统的作用就是用户只需登录一次就可以在多个系统之间切换而不用重新登录。刚毕业的时候接触过点单点登录，不过久了有点忘了，这篇文章来讲述单点登录相关知识点，并且根据两种主流实现方式CAS和JWT来讲解。<br><a id="more"></a></p>
+<h2 id="单点登录背景"><a href="#单点登录背景" class="headerlink" title="单点登录背景"></a>单点登录背景</h2><p>我们先从最开始的方案来说，以前的单点登录是基于Cookie来实现的，这种方式是将用户名和密码加密之后存放在Cookie中，之后访问系统时通过过滤器来校验用户权限，如果有权限就从Cookie中取出用户名和密码来进行登录，让用户感觉上只用登录一次。</p>
+<p>基于Cookie的这种方式的缺点很明显，多个系统都有登录逻辑的代码，如果有修改那就多个系统都得修改，还有的就是多次传输用户名字和密码，即使是加密的也还是存在增加被盗风险，还有一个非常不方便的就是跨域，这个对现在的系统来说是不合适的，如果是二级域的还可以通过设置cookie范围为顶域，这个时候cookie还能共享，但是现代化的系统非常多，可能顶级域名都不是一样，这个时候cookie就没办法共享了，这种方案就不合适了。</p>
+<p>接下来我们看一下统一认证中心方案，基于Cookie方案的登录认证过于分散，而且代码逻辑重复，现在我们将认证统一化，形成一个独立的服务，当用户需要进行登录操作的时候，统一重定向到认证服务，流程如下：</p>
+<ol>
+<li>用户访问A系统，A系统的过滤器判断用户是否登录，如果没有登录，则重定向到认证服务。</li>
+<li>重定向到认证服务，输入用户名和密码登录，认证服务将用户登录的信息记录到服务器的session中</li>
+<li>认证服务发给浏览器一个特殊的凭证，浏览器将凭证交给A系统，A系统拿着凭证去认证服务验证凭证的有效性，从而判断用户是否登录成功。</li>
+</ol>
+<h2 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h2><p>CAS是Yale大学开源的一个统一认证服务，CAS包括两个部分：CAS Server 和 CAS Client，CAS Server负责对用户的认证工作，需要独立部署，CAS Client与受保护的客户端一起部署，通过Filter形式保护资源，负责处理对客户端受保护资源的访问请求，需要对请求方重定向到CAS Server进行认证。</p>
+<p>工作流程如下：<br>1、用户访问A系统，A系统是需要登录，但是用户现在没有登录<br>2、重定向到CAS Server，即UAP(统一登录平台)，UAP也没有登录，跳转到登录页面<br>3、用户填写用户名、密码，UAP进行认证后，将登录状态写入UAP的session中，浏览器写入UAP域下的cookie<br>4、UAP登录完成后会生成一个ST(Service Ticket),然后跳转到A系统，同时将ST作为参数传递给A系统<br>5、A系统拿到ST后，后台过滤器拦截到，CAS Client向UAP发送请求，验证ST是否有效<br>6、验证通过后，A系统将登录状态写入session并设置A系统域下的cookie</p>
+<p>这样子用户就完成了A系统的登录，接下来我们看一下用户继续访问B系统</p>
+<p>1、用户访问B系统，B系统没有登录，重定向到UAP<br>2、用户已登录过UAP，不需要重新登录认证<br>3、UAP生成ST，跳转到B系统，将ST作为参数传给B系统<br>4、B系统拿到ST之后，CAS Client向UAP验证ST是否有效<br>5、验证通过后，B系统将登录状态写入session并设置B系统域下cookie</p>
+<p>通过对这个流程分析我们发现，用户登录了A系统之后再访问B系统就不会再出现重定向到登录页面，这样就完成了单点登录，即使A系统和B系统时不同的域，session不同享也都没关系。</p>
+<p>接下来做个CAS的DEMO</p>
+<p>先来完成cas服务端的部署,从Github上将cas的代码检出来，然后build war包，放到tomcat里边执行<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https:<span class="regexp">//gi</span>thub.com<span class="regexp">/apereo/</span>cas-overlay-template.git</span><br><span class="line">git checkout remotes<span class="regexp">/origin/</span><span class="number">5.3</span>  <span class="comment"># master分支是gradle构建，5.x是maven构建</span></span><br><span class="line">.<span class="regexp">/mvnw clean package</span></span><br></pre></td></tr></table></figure></p>
+<p>等待打包执行完毕，在target目录下有cas.war,然后把这个war包放到tomcat8上就可以了，因为cas已经采用springboot改造过了，打出来的war包最好放在tomcat8或者更高的版本之上，这样子才不会有问题的，启动完之后访问 <a href="http://localhost:8080/cas/login" target="_blank" rel="noopener">http://localhost:8080/cas/login</a> 就可以看到登录页面了，默认的用户名和密码为casuser/Mellon,这个写在springboot的配置文件application.properties文件中。</p>
+<p>通常在实际项目中，我们是用https来进行访问，下面来配置https访问<br>先用jdk工具生成秘钥库<br><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -genkey -<span class="built_in">alias</span> cas-tomcat -keyalg RSA -keystore cas.keystore</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">➜  classes keytool -genkey -alias cas-tomcat -keyalg RSA -keystore cas.keystore</span><br><span class="line">Enter keystore password:  </span><br><span class="line">Re-enter <span class="keyword">new</span> password: </span><br><span class="line">What <span class="keyword">is</span> your <span class="keyword">first</span> <span class="built_in">and</span> <span class="keyword">last</span> name?</span><br><span class="line">  [Unknown]:  sso.demo.<span class="keyword">com</span></span><br><span class="line">What <span class="keyword">is</span> the name of your organizational unit?</span><br><span class="line">  [Unknown]:  demo.<span class="keyword">com</span></span><br><span class="line">What <span class="keyword">is</span> the name of your organization?</span><br><span class="line">  [Unknown]:  demo.<span class="keyword">com</span></span><br><span class="line">What <span class="keyword">is</span> the name of your City <span class="built_in">or</span> Locality?</span><br><span class="line">  [Unknown]:  gz</span><br><span class="line">What <span class="keyword">is</span> the name of your State <span class="built_in">or</span> Province?</span><br><span class="line">  [Unknown]:  gd</span><br><span class="line">What <span class="keyword">is</span> the two-letter country code <span class="keyword">for</span> this unit?</span><br><span class="line">  [Unknown]:  <span class="keyword">cn</span></span><br><span class="line">Is CN=sso.demo.<span class="keyword">com</span>, OU=demo.<span class="keyword">com</span>, O=demo.<span class="keyword">com</span>, L=gz, ST=gd, C=<span class="keyword">cn</span> correct?</span><br><span class="line">  [<span class="keyword">no</span>]:  <span class="keyword">y</span></span><br><span class="line"></span><br><span class="line">Enter key password <span class="keyword">for</span> <span class="symbol">&lt;cas-tomcat&gt;</span></span><br><span class="line">	(RETURN <span class="keyword">if</span> same <span class="keyword">as</span> keystore password):  </span><br><span class="line">Re-enter <span class="keyword">new</span> password:</span><br></pre></td></tr></table></figure>
+<p>导出证书<br><figure class="highlight delphi"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -<span class="keyword">export</span> -<span class="keyword">file</span> cas.crt -<span class="keyword">alias</span> cas-tomcat -keystore cas.keystore</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight delphi"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  classes keytool -<span class="keyword">export</span> -<span class="keyword">file</span> cas.crt -<span class="keyword">alias</span> cas-tomcat -keystore cas.keystore</span><br><span class="line"></span><br><span class="line">Enter keystore password:  </span><br><span class="line">Certificate <span class="keyword">stored</span> <span class="keyword">in</span> <span class="keyword">file</span> &lt;cas.crt&gt;</span><br></pre></td></tr></table></figure>
+<p>将证书导入JDK中，不然认证了跳过来就会报错，ssl建立连接错误<br><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -import -keystore $&#123;JAVA_HOME&#125;/jre/<span class="class"><span class="keyword">lib</span>/<span class="title">security</span>/<span class="title">cacerts</span> -<span class="title">file</span> <span class="title">cas</span>.<span class="title">crt</span> -<span class="title">alias</span> <span class="title">cas</span>-<span class="title">tomcat</span></span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">➜  classes sudo keytool -import -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/security/cacerts -file cas.crt -alias cas-tomcat</span><br><span class="line"></span><br><span class="line">Enter keystore password:  </span><br><span class="line">Re-enter new password: </span><br><span class="line">Owner: <span class="attribute">CN</span>=sso.demo.com, <span class="attribute">OU</span>=demo.com, <span class="attribute">O</span>=demo.com, <span class="attribute">L</span>=gz, <span class="attribute">ST</span>=gd, <span class="attribute">C</span>=cn</span><br><span class="line">Issuer: <span class="attribute">CN</span>=sso.demo.com, <span class="attribute">OU</span>=demo.com, <span class="attribute">O</span>=demo.com, <span class="attribute">L</span>=gz, <span class="attribute">ST</span>=gd, <span class="attribute">C</span>=cn</span><br><span class="line">Serial number: 5890e418</span><br><span class="line">Valid <span class="keyword">from</span>: Sun May 26 11:41:41 CST 2019 until: Sat Aug 24 11:41:41 CST 2019</span><br><span class="line">Certificate fingerprints:</span><br><span class="line">	 MD5:  69:69:38:A9:52:03:D2:3D:DA:28:03:CD:53:59:48:23</span><br><span class="line">	 SHA1: F2:9A:55:04:E8:A2:E6:4C:C2:85:8D:EA:9A:47:E6:27:C1:DC:41:B2</span><br><span class="line">	 SHA256: 1B:25:A6:B9:F9:36:AD:E7:CD:28:2E:57:D8:30:8C:8A:9E:6C:07:CB:03:70:78:5E:AE:9C:AB:72:27:0A:13:B3</span><br><span class="line">	 Signature algorithm name: SHA256withRSA</span><br><span class="line">	 Version: 3</span><br><span class="line"></span><br><span class="line">Extensions: </span><br><span class="line"></span><br><span class="line"><span class="comment">#1: ObjectId: 2.5.29.14 Criticality=false</span></span><br><span class="line">SubjectKeyIdentifier [</span><br><span class="line">KeyIdentifier [</span><br><span class="line">0000: 93 1B 15 7E 7D 26 A3 51   35 ED 51 30 E4 EA 52 77  <span class="built_in">..</span><span class="built_in">..</span>.&amp;.Q5.Q0<span class="built_in">..</span>Rw</span><br><span class="line">0010: 19 9C 93 C1                                        <span class="built_in">..</span><span class="built_in">..</span></span><br><span class="line">]</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">Trust this certificate? [<span class="literal">no</span>]:  y</span><br><span class="line">Certificate was added <span class="keyword">to</span> keystore</span><br></pre></td></tr></table></figure>
+<p>接下来配置tomcat的server.xml<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Connector <span class="attribute">port</span>=<span class="string">"443"</span> <span class="attribute">protocol</span>=<span class="string">"org.apache.coyote.http11.Http11Protocol"</span></span><br><span class="line">   <span class="attribute">maxThreads</span>=<span class="string">"150"</span> <span class="attribute">SSLEnabled</span>=<span class="string">"true"</span> <span class="attribute">scheme</span>=<span class="string">"https"</span> <span class="attribute">secure</span>=<span class="string">"true"</span></span><br><span class="line">   <span class="attribute">clientAuth</span>=<span class="string">"false"</span> <span class="attribute">sslProtocol</span>=<span class="string">"TLS"</span> <span class="attribute">keystoreFile</span>=<span class="string">"/Users/***/apache-tomcat-8.5.41/webapps/cas/WEB-INF/classes/cas.keystore"</span> <span class="attribute">keystorePass</span>=<span class="string">"123456"</span>  /&gt;</span><br></pre></td></tr></table></figure></p>
+<p>配置域名映射<code>127.0.0.1  sso.demo.com</code>,这样子就可以通过<a href="https://sso.demo.com/cas" target="_blank" rel="noopener">https://sso.demo.com/cas</a> 来进行访问了。</p>
+<p>cas服务端就部署完成了，接下来我们将Cas Client和具体的应用系统结合起来。</p>
+<p>具体代码见Github仓库中的cas模块，启动CasApplication类。</p>
+<p><div class="github-widget" data-repo="ruanzz/sso"></div><br>cas模块是一个SpringBoot应用，跑起来之后访问<a href="https://localhost:8099/test" target="_blank" rel="noopener">https://localhost:8099/test</a> 就会自动跳转到<a href="https://sso.demo.com/cas/login" target="_blank" rel="noopener">https://sso.demo.com/cas/login</a> 认证过之后会重定向回来访问<a href="https://localhost:8099/test" target="_blank" rel="noopener">https://localhost:8099/test</a></p>
+<p>到这里CAS基本认证流程就OK了。</p>
+<h2 id="JWT"><a href="#JWT" class="headerlink" title="JWT"></a>JWT</h2><p>TODO</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/04/13/sso/">单点登录</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-04-13, 21:34:10</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/04/13/sso/" title="单点登录">https://ruanzz.github.io/2019/04/13/sso/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/04/13/sso/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/05/21/comment/">
+                    神级注释
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/04/07/kubernetes/">
+                    Kubernetes
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#单点登录背景"><span class="toc-number">1.</span> <span class="toc-text">单点登录背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAS"><span class="toc-number">2.</span> <span class="toc-text">CAS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JWT"><span class="toc-number">3.</span> <span class="toc-text">JWT</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"单点登录　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/05/21/comment/" title="上一篇: 神级注释">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/04/07/kubernetes/" title="下一篇: Kubernetes">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

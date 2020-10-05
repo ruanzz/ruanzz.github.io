@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="Nginx是后端开发人员应该都会接触的一款基础软件，以支持高并发访问面世，在开发环境中经常会配置一些Nginx参数来支持我们开发，那么问题来了，你有系统的了解过吗？">
+<meta name="keywords" content="Nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能Nginx(一)">
+<meta property="og:url" content="https://ruanzz.github.io/2018/12/22/talk-nginx/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="Nginx是后端开发人员应该都会接触的一款基础软件，以支持高并发访问面世，在开发环境中经常会配置一些Nginx参数来支持我们开发，那么问题来了，你有系统的了解过吗？">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ruanzz.github.io/asset/img/nginx/visit-nginx.png">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="高性能Nginx(一)">
+<meta name="twitter:description" content="Nginx是后端开发人员应该都会接触的一款基础软件，以支持高并发访问面世，在开发环境中经常会配置一些Nginx参数来支持我们开发，那么问题来了，你有系统的了解过吗？">
+<meta name="twitter:image" content="https://ruanzz.github.io/asset/img/nginx/visit-nginx.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>高性能Nginx(一) | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-talk-nginx" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/12/22/talk-nginx/" class="article-date">
+      <time datetime="2018-12-22T09:56:20.000Z" itemprop="datePublished">2018-12-22</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      高性能Nginx(一)
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Web/">Web</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/">Nginx</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <!-- ![Nginx服务网关](/asset/img/nginx/nginx.png) -->
+<p>Nginx是后端开发人员应该都会接触的一款基础软件，以支持高并发访问面世，在开发环境中经常会配置一些Nginx参数来支持我们开发，那么问题来了，你有系统的了解过吗？</p>
+<a id="more"></a>
+<h2 id="Nginx是什么"><a href="#Nginx是什么" class="headerlink" title="Nginx是什么"></a>Nginx是什么</h2><p>Nginx是一个高性能的Web和反向代理服务器。</p>
+<h2 id="Nginx应用场景"><a href="#Nginx应用场景" class="headerlink" title="Nginx应用场景"></a>Nginx应用场景</h2><h3 id="Web服务器"><a href="#Web服务器" class="headerlink" title="Web服务器"></a>Web服务器</h3><p>Web服务器一般用来处理JavaScript，HTML，CSS等静态资源。同类产品有Apache，IIS,但是Nginx是C语言写的，并且使用的epoll and kqueue开发模型，占用更少资源，却拥有更高的性能。一般谈到Web服务器的时候往往会谈到Web应用服务器，比如Tomcat、Jetty等，Web应用服务器是处理Servlet程序的载体，Web应用服务器的并发能力远低于Web服务器。</p>
+<h3 id="反向代理服务器"><a href="#反向代理服务器" class="headerlink" title="反向代理服务器"></a>反向代理服务器</h3><p>首先理解一下什么是代理，默认是正向代理，代理的是客户端，通过客户端的设置，实现让一台服务器(代理服务器)来代理客户端，客户端所有的请求都交由代理服务器来处理，比如翻墙用的梯子就是正向代理最好案例。认识了代理，反向代理就和正向代理正好相反，用一台服务器代理真实的服务器，当有用户进行访问请求时，不再访问真实的服务器，而是访问代理服务器，有代理服务器将请求转发交给真实的服务器处理。<br>Nginx用来当反向代理服务器时，需要在Nginx的配置文件中配置好反向代理的规则，不同的请求交给不同的真实服务器处理，当请求到达Nginx时，Nginx会根据已经定义好的规则进行请求的转发，从而实现路由的功能，并且可以解决应用中通过域名访问的时候的端口问题。</p>
+<p>在开发中，我们更多是把他当做网关，因为它具备网关必备的功能：</p>
+<ul>
+<li>反向代理</li>
+<li>负载均衡</li>
+<li>动态路由</li>
+<li>请求过滤</li>
+</ul>
+<p>和SpringCloud中的Zuul网关一样，但是Zuul网关我们是用来做服务内部调用的网关，带有鉴权作用，Nginx作为外部网关，因为并发能力太强了，单机可以支持50000个并发，直接碾压Tomcat的200个并发。</p>
+<h2 id="Nginx实践"><a href="#Nginx实践" class="headerlink" title="Nginx实践"></a>Nginx实践</h2><p>安装和启动这里就直接略过了，看到Nginx的欢迎页面就说明Nginx启动好了。</p>
+<p><img src="/asset/img/nginx/visit-nginx.png" alt="访问Nginx"></p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>nginx.conf是Nginx的配置文件，它是由特定的标识符(指令符)分为多个不同的模块，这个文件就是前文讲过的配置反向代理规则的地方，接下来了解下Nginx的配置文件。<br>指令符分为简单指令和块指令:</p>
+<ul>
+<li>简单指令格式： name value;</li>
+<li>块指令格式：  {name value;} </li>
+</ul>
+<p>块指令也可以称为上下文(e.g. events,http,server,location)，值得注意的是，所有不属于块指令的简单指令都属于main上下文，http块指令也属于main上下文，server块指令属于http上下文</p>
+<h3 id="配置静态访问"><a href="#配置静态访问" class="headerlink" title="配置静态访问"></a>配置静态访问</h3><p>Nginx默认在http上下文中配置了一个server的块指令，监听80端口，访问<code>/</code>的时候就进入这个server中<br>，并且配置了server的根目录和首页。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line">    server_name  localhost;</span><br><span class="line">    location / &#123;</span><br><span class="line">        root   html</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置反向代理"><a href="#配置反向代理" class="headerlink" title="配置反向代理"></a>配置反向代理</h3><p>server可以配置多个，相当于配置多台server提供服务，但是都是通过80端口访问Nginx之后，通过Nginx的proxy_pass进行转发。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line">    server_name  tomcat111;</span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass  http://10.10.111.111:8090</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line">    server_name  tomcat112;</span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass  http://10.10.111.112:8090</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置负载均衡"><a href="#配置负载均衡" class="headerlink" title="配置负载均衡"></a>配置负载均衡</h3><p>1.轮询(默认)<br>每个请求按照时间顺序逐一分配到不同的后端服务器，按照服务器列表顺序来提供服务，如果down掉了，可以自动跳过。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">upstream backserver&#123;</span><br><span class="line">    server  10.10.111.111;</span><br><span class="line">    server  10.10.111.112;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2.指定权重</p>
+<p>指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">upstream backserver&#123;</span><br><span class="line">    server 10.10.111.111 weight=10;</span><br><span class="line">    server 10.10.111.112 weight=5;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>3.IP绑定<br>每个请求按照请求IP的HASH结果分配，这样子每个IP固定访问一个后端服务，这个可以解决集群的session共享问题。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">upstream backserver&#123;</span><br><span class="line">    ip_hash;</span><br><span class="line">    server  10.10.111.111;</span><br><span class="line">    server  10.10.111.112;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置Nginx解决跨域问题"><a href="#配置Nginx解决跨域问题" class="headerlink" title="配置Nginx解决跨域问题"></a>配置Nginx解决跨域问题</h3><p>跨域问题是浏览器为了安全性做的一个限制，请求的url和浏览器地址栏的url中端口|域名|协议不一样都属于跨域，我们可以借助Nginx的反向代理解决这个这个问题。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line">    server_name  www.xxx.com;</span><br><span class="line">    location /order &#123;</span><br><span class="line">        proxy_pass  http://search.a.com:8090</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line">    location /manage &#123;</span><br><span class="line">        proxy_pass  http://manage.a.com:8090</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置防盗链"><a href="#配置防盗链" class="headerlink" title="配置防盗链"></a>配置防盗链</h3><p>利用referer来做防盗链检查，只允许某个域名来请求资源，如果不是从某个域名来的，返回403未授权</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line">    server_name  www.xxx.com;</span><br><span class="line">    location ~ .*\.(jpg|jpeg|JPG|png|gif|icon)$ &#123;</span><br><span class="line">        valid_referers blocked http://www.xxx.com www.xxx.com;</span><br><span class="line">        if ($invalid_referer) &#123;</span><br><span class="line">            return 403;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Nginx高可用"><a href="#Nginx高可用" class="headerlink" title="Nginx高可用"></a>Nginx高可用</h2><p>Nginx作为外部网关，如果只是一台的话存在单点故障，那么整个后端服务都不能提供服务，所以要搭建Nginx高可用，现在互联网应用基本都在关注这两点，高并发和高可用。我们借助Keepalived来实现高可用,那么接下来我们来了解一下Keepalived。<br>Keepalived从字面意思就可以知道它的作用–保持活着。官方的说辞是主要提供负载均衡(Load Balance)和高可用(high-availablity)功能。负载均衡实现需要依赖Linux的虚拟内核模块ipvs(IP虚拟服务器，用于实现网络服务的负载均衡)，高可用通过VRRP协议实现多台机器之间的故障转移业务。</p>
+<h3 id="配置Keepalived"><a href="#配置Keepalived" class="headerlink" title="配置Keepalived"></a>配置Keepalived</h3><p>Keepalived的配置文件为keepalived.conf，配置说明如下:<br>Master节点<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span><br><span class="line">   router_id nginx111 ##标识节点的字符串，通常为hostname</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_script chk_nginx &#123;</span><br><span class="line">    script "/etc/keepalived/nginx_check.sh" ##执行脚本位置，检查节点状态，根据返回结果动态调整权重</span><br><span class="line">    interval 2 ##检测时间间隔</span><br><span class="line">    weight -20 ## 如果条件成立则权重减20（-20）</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER   ## 主节点为MASTER，备份节点为BACKUP</span><br><span class="line">    interface en0  ## 绑定虚拟IP的网络接口（网卡）</span><br><span class="line">    virtual_router_id 111  ## 虚拟路由ID号</span><br><span class="line">    mcast_src_ip 10.10.111.111 ## 本机ip地址</span><br><span class="line">    priority 100  ##优先级配置（0-254的值）</span><br><span class="line">    Nopreempt  </span><br><span class="line">    advert_int 1 ## 组播信息发送间隔，俩个节点必须配置一致，默认1s</span><br><span class="line">    authentication &#123;  </span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 123456 ## 真实生产环境下对密码进行匹配</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_nginx</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        10.10.111.110 ## 虚拟ip(vip)，可以指定多个</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Backup节点:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span><br><span class="line">   router_id bhz006</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_script chk_nginx &#123;</span><br><span class="line">    script "/etc/keepalived/nginx_check.sh"</span><br><span class="line">    interval 2</span><br><span class="line">    weight -20</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    interface en0</span><br><span class="line">    virtual_router_id 112</span><br><span class="line">    mcast_src_ip 10.10.111.112</span><br><span class="line">    priority 90 ##优先级配置,比master低</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 123456</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_nginx</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        10.10.111.110</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>nginx_check.sh 脚本:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/bash</span></span><br><span class="line">A=`ps -C nginx –no-header |wc -l`</span><br><span class="line">if [ $A -eq 0 ];then</span><br><span class="line">    /usr/local/nginx/sbin/nginx</span><br><span class="line">    sleep 2</span><br><span class="line">    if [ `ps -C nginx --no-header |wc -l` -eq 0 ];then</span><br><span class="line">        killall keepalived</span><br><span class="line">    fi</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>启动Nginx和Keepalived，检查vip是否配置在对应的网络接口，干掉Master，Nginx还是能够正常提供服务。一般当某些服务出现问题，特别是像Nginx这些重要组件出现问题的时候，一般会从脚本文件中加上发送邮件的代码，或者有监控平台的话会以各种各样的方式比如短信、微信、钉钉进行通知。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2018-12-22, 09:56:20</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2018/12/22/talk-nginx/" title="高性能Nginx(一)">https://ruanzz.github.io/2018/12/22/talk-nginx/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2018/12/22/talk-nginx/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/01/18/flag/">
+                    Flag
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2018/12/18/interview-summary/">
+                    Java后端面试题整理
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx是什么"><span class="toc-number">1.</span> <span class="toc-text">Nginx是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx应用场景"><span class="toc-number">2.</span> <span class="toc-text">Nginx应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Web服务器"><span class="toc-number">2.1.</span> <span class="toc-text">Web服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#反向代理服务器"><span class="toc-number">2.2.</span> <span class="toc-text">反向代理服务器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx实践"><span class="toc-number">3.</span> <span class="toc-text">Nginx实践</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#配置文件"><span class="toc-number">3.1.</span> <span class="toc-text">配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置静态访问"><span class="toc-number">3.2.</span> <span class="toc-text">配置静态访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置反向代理"><span class="toc-number">3.3.</span> <span class="toc-text">配置反向代理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置负载均衡"><span class="toc-number">3.4.</span> <span class="toc-text">配置负载均衡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置Nginx解决跨域问题"><span class="toc-number">3.5.</span> <span class="toc-text">配置Nginx解决跨域问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置防盗链"><span class="toc-number">3.6.</span> <span class="toc-text">配置防盗链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nginx高可用"><span class="toc-number">4.</span> <span class="toc-text">Nginx高可用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#配置Keepalived"><span class="toc-number">4.1.</span> <span class="toc-text">配置Keepalived</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测试"><span class="toc-number">4.2.</span> <span class="toc-text">测试</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"高性能Nginx(一)　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/01/18/flag/" title="上一篇: Flag">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2018/12/18/interview-summary/" title="下一篇: Java后端面试题整理">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

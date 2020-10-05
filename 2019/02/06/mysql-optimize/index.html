@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="MySQL优化是在工作中必须要学会的一个技能，在优化之前有一个非常重要的问题，必须要对MySQL进行优化了吗？是否可以从代码层面(业务或者架构)来提高效率呢？假设必须要对MySQL层面优化，那么问题来了——如何下手？先观察后优化！先定位问题出现在哪里，然后才是有针对性的去调优。">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL优化思路">
+<meta property="og:url" content="https://ruanzz.github.io/2019/02/06/mysql-optimize/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="MySQL优化是在工作中必须要学会的一个技能，在优化之前有一个非常重要的问题，必须要对MySQL进行优化了吗？是否可以从代码层面(业务或者架构)来提高效率呢？假设必须要对MySQL层面优化，那么问题来了——如何下手？先观察后优化！先定位问题出现在哪里，然后才是有针对性的去调优。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL优化思路">
+<meta name="twitter:description" content="MySQL优化是在工作中必须要学会的一个技能，在优化之前有一个非常重要的问题，必须要对MySQL进行优化了吗？是否可以从代码层面(业务或者架构)来提高效率呢？假设必须要对MySQL层面优化，那么问题来了——如何下手？先观察后优化！先定位问题出现在哪里，然后才是有针对性的去调优。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>MySQL优化思路 | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-mysql-optimize" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/02/06/mysql-optimize/" class="article-date">
+      <time datetime="2019-02-06T09:26:26.000Z" itemprop="datePublished">2019-02-06</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySQL优化思路
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/数据库/">数据库</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>MySQL优化是在工作中必须要学会的一个技能，在优化之前有一个非常重要的问题，必须要对MySQL进行优化了吗？是否可以从代码层面(业务或者架构)来提高效率呢？假设必须要对MySQL层面优化，那么问题来了——如何下手？先观察后优化！先定位问题出现在哪里，然后才是有针对性的去调优。<br><a id="more"></a></p>
+<h2 id="定位"><a href="#定位" class="headerlink" title="定位"></a>定位</h2><p>一般我们会先观察的MySQL Server服务的查询数量以及线程数量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -uroot ext -proot | awk <span class="string">'/Queries/&#123;q=$4&#125;/Threads_connected/&#123;tc=$4&#125;/Threads_running/&#123;tr=$4&#125;END&#123;printf("Queries\tThreads_connected\tThreads_running\n%d\t%d\t%d\n",q,tc,tr)&#125;'</span></span><br></pre></td></tr></table></figure></p>
+<p>还有当前在处理的线程的的状态<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">processlist</span> \G;</span><br></pre></td></tr></table></figure></p>
+<p>重点关注<code>Copying to temp table</code>和<code>Sorting result</code>状态，这两种状态是常见的非常耗资源的状态。如果查询量比较大的话还可能会在<code>Sending data</code>阶段耗费长时间，这个时候就应该要考虑是否可以分页或者减少查询字段了。<br>我们还可以借助profile来观察每条语句在各个过程消耗的时间,一般profile是OFF的，我们需要将它开启<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 查看profile状态</span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">LIKE</span> <span class="string">'profiling'</span>;</span><br><span class="line"># 开启profile</span><br><span class="line"><span class="keyword">SET</span> profiling=<span class="keyword">ON</span>;</span><br></pre></td></tr></table></figure></p>
+<p>之后的SQL语句都会有详细的记录，可以借助下面两条语句来查看<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 查看全部语句的各自花费时间</span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">PROFILES</span>;</span><br><span class="line"># 查询某条语句各个过程花费的时间</span><br><span class="line"><span class="keyword">SHOW</span> PROFILE <span class="keyword">FOR</span> <span class="keyword">QUERY</span> &#123;query_id&#125;</span><br></pre></td></tr></table></figure></p>
+<p>但是最重要的分析语句执行过程是<code>explain</code>来分析，后边会重点说这个。</p>
+<h2 id="优化过程"><a href="#优化过程" class="headerlink" title="优化过程"></a>优化过程</h2><p>了解了定位的时候主要看哪些指标，那么我们在开发过程中就要注意一下，不要等到需要优化了才去explain每条语句优化。我们应该从建表到写SQL语句都需要考虑性能问题。</p>
+<h3 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h3><p>表结构要合理拆分。 </p>
+<p>定长与变长分离，常用字段与不常用字段分离，用主键进行关联，根据业务特点合理添加冗余字段，字段的选取尽量选择合适的，存储够用就行，大存储字段浪费内存，影响速度，像核心字段都用int，char，enum等定长结构，非核心字段的话用varchar，text等非定长字段，或者拆出来单独放一张表。</p>
+<p>尽量避免使用NULL,既不利于索引也可能更加的耗存储。</p>
+<p>如果表结构规划的的不合理，后续一个业务就要连接非常多的表才能查询出数据，这种时候就要从业务角度考虑了，不要为了满足数据库范式而写代码，数据库范式只是提供了一个准则，我们开发人员应该要根据具体的业务来完成表结构的合理规划，不然后续要改数据库表结构将会很痛苦。</p>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>索引是为了提高查询效率，下面我们来了解一下索引。</p>
+<p>MySQL官方对索引的定义为：索引(Index)是帮助MySQL高效获取数据的数据结构。总结一下就是索引是数据结构。既然是一种数据结构的，那么就会有多种实现方式，比如B+Tree索引(平衡树，也可以理解为排好序的快速查找结构)、Hash索引。</p>
+<p>常用的是B+Tree索引，Hash索引的理论查询时间是O(1),为什么不用它呢？Hash索引的存储是通过hash值进行计算，即使id是连续增长的，但是hash出来的值千差万别，存储的位置是随机的，还有一个致命的缺点就是不能对范围进行查询，更无法对排序优化，还有就是必须回行，通过索引拿到数据存储位置之后，必须回到表中去取数据。正是这些缺点导致Hash索引的使用场景非常有限，像memory表用的就是hash索引，不需要对数据库进行范围查询，只需要快速定位数据。B+tree是不是就很好了呢？目前来看是的，综合起来首先要满足业务，支持对返回查询，排序优化，然后尽可能快，这些基本上就满足了我们业务上的基本要求。</p>
+<p>在MySQL中，索引属于存储引擎级别的概念，不同的存储引擎的实现方式也是不同的，在MySQL中常见的存储引擎有两种：MyISAM和InnoDB。</p>
+<p>先来看一下MyISAM,使用B+Tree作为索引结构，也叫非聚簇索引，因为无论是主索引还是辅助索引，其结构都是一样的，叶子节点的data域存放的是数据表记录的地址，因此MyISAM的索引查找结果的过程为按照B+Tree搜索算法搜索索引，如果指定的key存在，取出其data域的值，然后以data域的值为地址，读取相应的数据记录。</p>
+<p>再来看一下InnoDB,同样也是使用B+Tree作为索引结构，但是和MyISAM有很大的不同，甚至相反，叫聚簇索引。MyISAM的索引文件和数据文件是分离的，索引文件只保留了数据记录的地址，而在InnoDB中，数据文件本身就是索引文件，数据是直接存储在节点的data域中，所以InnoDB必须要有主键，不然数据找不到地方存储，也因此得名聚簇索引。这就带来了一个问题了，那辅助索引怎么办？InnoDB是这样子处理的，辅助索引的data域存储的是主键的值，这样子所有的辅助索引定位到节点之后就可以拿得到主索引的值，然后再去主索引的B+Tree中查找对应节点，取出节点中data域就是数据记录了。</p>
+<p>了解了两种存储引擎实现的索引，我们来对比一下，先从主键索引来看，MyISAM的索引树信息很少，查找相对较快，查找到相应节点之后取出data域信息之后还要根据地址去取数据记录，InnoDB查找相对慢一点，查找过程中遍历的数据量较多，但是查找到相应节点之后直接在节点上去取出数据，不需要在另外的回行取数据，对于主索引来说，这两种方式相差不会太多，数据量大的时候MyISAM的优势就明显了；辅助索引呢就是MyISAM大胜了，InnoDB中的辅助索引找到了只是主索引的值，还得去主索引的B+Tree上查找一次，找到对应节点才能去到data域中的数据记录。这两种的差别是他们的最初的目标决定的，MyISAM的强项是查询，索引是加快查询的最有效的方法，因此MyISAM采取的是非聚簇索引的，使得无论是主索引还是辅助索引，效率基本上是一样。InnoDB是为了平衡查询和事务，MyISAM是不支持事务，如果业务上需要到事务，那还是老实选择InnoDB吧，但是同时也要尽量的发挥InnoDB索引的查询优势，主键的选取就是一个很关键，必须单调并且不宜过长，为什么必须单调呢？这个是数据结构致使的，只要使用的是B+Tree，主键就应该单调，如果不单调，在插入新数据之后，二叉查找树要保持树的平衡，就得重新排序，频繁的分裂调整整棵树的结构，效率是非常低的，使用递增方式可以有效的解决这个问题。为什么不宜过长呢？InnoDB的辅助索引查询效率并不高，尽量能不用就不用，但是现实业务往往是需要辅助索引的，辅助索引的data域存储的是主键的值，过长就会导致额外的存储过多，使得辅助索引非常大。</p>
+<p>索引在提升查询效率上的效果是十分明显的，但是在实际项目中我们会发现有时候索引并不生效，那么什么情况下会导致索引失效呢？只有了解了索引没有生效的情况，在开发过程中才能避免。<br>1.where条件中用or，即使其中有条件带索引，也不会使用索引。可以考虑使用union或者in来替换or。<br>2.对于多列索引，没有按照索引的定义顺序使用查询，这种时候索引也不生效，可以调整查询条件顺序或者重新创建索引使其生效。<br>3.like模糊查询使用%开头，尽量避免使用%开头，以%结尾可以生效<br>4.索引列不要做任何操作，包括计算(包含大于，小于，不等于)，函数，类型转换等等这些操作都会使索引失效。<br>5.索引列是字符串没有加上引号会使得索引不生效。<br>6.把where后边的字段都加上了单列索引，是不会所有的索引都生效的，因为是独立索引，生效的只有一个。应该加上多列索引，多列索引生效的前提是要满足前缀要求。</p>
+<h3 id="语句"><a href="#语句" class="headerlink" title="语句"></a>语句</h3><p>SQL语句我们一般是先满足业务要求，先把业务逻辑完成了，接下来才是有针对性的优化，可以借助Druid数据库连接池的监控或者在开发阶段开启慢日志查询，推荐使用Druid，可以清楚的知道哪些SQL语句比较慢，上线之后可能会出现问题。</p>
+<p>接下来我们详细了解一下EXPLAIN</p>
+<p>EXPLAIN命令是用来查看SQL语句的执行计划，直接在执行的SQL前面加上EXPLAIN命令之后执行即可。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select * from goods;</span><br><span class="line">+<span class="comment">----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+</span></span><br><span class="line">| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra |</span><br><span class="line">+<span class="comment">----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+</span></span><br><span class="line">| 1  | SIMPLE      | goods | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 2    | 100.00   | NULL  |</span><br><span class="line">+<span class="comment">----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+</span></span><br><span class="line">1 rows in <span class="keyword">set</span> (<span class="number">0.02</span> sec)</span><br></pre></td></tr></table></figure>
+<p>select_type ： 查询类型</p>
+<pre><code>- SIMPLE 简单查询，不包含子查询或者UNION
+- PRIMARY 查询中若包含子查询，最外层查询类型为PRIMARY
+- SUBQUERY 查询中若包含子查询，里层的查询类型为SUBQUERY
+- DERIVED from的表是一个子查询来完成的，为派生表，这个其实也属于SUBQUERY
+- UNION 该表是通过union完成
+</code></pre><p>table ： 操作的表<br>partitions ： 操作的分区<br>type ： 访问类型，是通过何种方式找到数据</p>
+<pre><code>- ALL 全表扫描
+- index 只遍历索引树
+- range 索引范围扫描，查询条件是between、or、in、&gt;、&lt;等这些都是range
+- ref 使用非唯一索引扫描或者唯一索引的前缀扫描，返回匹配某个单独值的记录行
+- eq_ref 类似ref，区别在于使用的是唯一索引，多表连接中的唯一索引作为关联条件
+- const/system MySQL对查询进行了优化，并转换为一个常量时，使用这些类型进行访问
+- NULL MySQL在优化过程中分解语句，执行时甚至不用访问表或者索引，比如找索引列的最小值
+</code></pre><p>possible_keys ：可能用到的索引，但不一定会被使用<br>key ： 在查询中实际使用的索引<br>key_length ：索引字段的最大可能长度，并非实际使用长度<br>ref ： 表的连接匹配条件<br>rows ： 找到记录需要读取的行数<br>filtered ：符合条件的记录数的百分比所做的一个悲观估算值<br>Extra ： 显示上述信息之外的信息，但是确是非常重要的</p>
+<pre><code>- Using index 索引覆盖
+- Using where 表示MySQL服务器将在存储引擎检索行后在进行过滤
+- Using temporary 表示MySQL需要使用临时表存储结果集，常见于排序和分组查询
+- Using filesort MySQL无法利用索引完成的排序操作称为文件排序
+- Using join buffer 表示获取连接条件时没有使用索引，并且需要连接缓冲区来存储中间结果
+- Impossible where 表示where语句会导致没有符合条件的行
+- Distinct 表示找到第一个匹配行之后就会停止搜索其他的行
+</code></pre><p>清楚了explain的各个列的值的含义，哪些值是我们重点关注的呢？</p>
+<p>先看type类型，尽量避免ALL全表扫描，对性能有要求的也尽量避免扫描全部索引，这种时候就要在开发的时候加上合适的索引</p>
+<p>再来看看Extra列，如果出现了Using temporary或者Using filesort则需要多加关注。<br>Using temporary往往是因为GROUP BY的列没有索引，或者GROUP BY和ORDER BY的列不一样，这种情况下就会产生临时表，建议加上合适的索引。<br>Using filesort表示无法利用索引完成排序，进而使用文件排序，也有可能是多表连接时排序的字段不是驱动表的列，建议加上合适的索引。<br>Using where 通常是因为全表扫描或者全索引扫描(type为ALL或者Index)，又加上了where条件，建议加上合适的索引</p>
+<p>怎么都是加索引呢？不是说不能增加太多的索引吗？</p>
+<p>确实是这样子，工作中碰到的80%的查询优化问题可以通过加上合适的索引来解决问题，索引就是为了优化查询而诞生的，这是它的职责所在。太多的索引会带来什么问题呢？就是更新数据的时候都要更新索引，这就影响到新增、修改和删除数据的性能，如果对这几个有很高的性能要求的话需要注意索引的数量，但是我工作中还没遇到这种场景，而且大多数表的索引都在3个以内，这个数量应该还好。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-02-06, 09:26:26</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/02/06/mysql-optimize/" title="MySQL优化思路">https://ruanzz.github.io/2019/02/06/mysql-optimize/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/02/06/mysql-optimize/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/03/24/office-skill/">
+                    职场技能
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/01/26/cloud-compute/">
+                    谈谈云
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#定位"><span class="toc-number">1.</span> <span class="toc-text">定位</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#优化过程"><span class="toc-number">2.</span> <span class="toc-text">优化过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#建表"><span class="toc-number">2.1.</span> <span class="toc-text">建表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#索引"><span class="toc-number">2.2.</span> <span class="toc-text">索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#语句"><span class="toc-number">2.3.</span> <span class="toc-text">语句</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"MySQL优化思路　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/03/24/office-skill/" title="上一篇: 职场技能">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/01/26/cloud-compute/" title="下一篇: 谈谈云">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

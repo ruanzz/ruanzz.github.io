@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="本文将介绍Linux常用几个命令，主要是用来定位线上环境出现问题，如果线上环境出了问题该怎么去找出问题，如何定位出有问题的代码段。">
+<meta name="keywords" content="prof">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux常用命令">
+<meta property="og:url" content="https://ruanzz.github.io/2020/01/13/linux-prof-important-cmd/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="本文将介绍Linux常用几个命令，主要是用来定位线上环境出现问题，如果线上环境出了问题该怎么去找出问题，如何定位出有问题的代码段。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux常用命令">
+<meta name="twitter:description" content="本文将介绍Linux常用几个命令，主要是用来定位线上环境出现问题，如果线上环境出了问题该怎么去找出问题，如何定位出有问题的代码段。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Linux常用命令 | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-linux-prof-important-cmd" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2020/01/13/linux-prof-important-cmd/" class="article-date">
+      <time datetime="2020-01-13T22:10:15.000Z" itemprop="datePublished">2020-01-13</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux常用命令
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Linux/">Linux</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/prof/">prof</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>本文将介绍Linux常用几个命令，主要是用来定位线上环境出现问题，如果线上环境出了问题该怎么去找出问题，如何定位出有问题的代码段。</p>
+<a id="more"></a>
+<h2 id="top"><a href="#top" class="headerlink" title="top"></a>top</h2><p><code>top</code>命令可以看到系统的整体运行情况。主要看3个值，cpu，mem和load average，cpu和memory是系统当前的使用百分比，load average是系统负载，有三个值，代表的是系统1分钟，5分钟，15分钟的平均负载值，如果这三个值取平均值大于0.6，说明系统当前负载比较高。</p>
+<p><code>top</code>还有一个精简命令<code>uptime</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">top - 22:35:45 up 16 min,  2 users,  load average: 0.04, 0.08, 0.06</span><br><span class="line">Tasks:  95 total,   1 running,  94 sleeping,   0 stopped,   0 zombie</span><br><span class="line"><span class="meta">%</span><span class="bash">Cpu(s):  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span></span><br><span class="line">KiB Mem :  1882152 total,  1117464 free,   385520 used,   379168 buff/cache</span><br><span class="line">KiB Swap:  2097148 total,  2097148 free,        0 used.  1345460 avail Mem </span><br><span class="line"></span><br><span class="line">  PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND               </span><br><span class="line"> 1238 root      20   0  318988  27388  11504 S  0.7  1.5   0:01.20 docker-containe       </span><br><span class="line"> 1697 jenkins   20   0 2589952 192284  18548 S  0.3 10.2   0:14.67 java                  </span><br><span class="line"> 2088 root      20   0       0      0      0 S  0.3  0.0   0:00.08 kworker/0:0           </span><br><span class="line">    1 root      20   0  127944   6604   4172 S  0.0  0.4   0:01.15 systemd               </span><br><span class="line">    2 root      20   0       0      0      0 S  0.0  0.0   0:00.00 kthreadd              </span><br><span class="line">    4 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 kworker/0:0H          </span><br><span class="line">    5 root      20   0       0      0      0 S  0.0  0.0   0:00.03 kworker/u2:0          </span><br><span class="line">    6 root      20   0       0      0      0 S  0.0  0.0   0:00.11 ksoftirqd/0           </span><br><span class="line">    7 root      rt   0       0      0      0 S  0.0  0.0   0:00.00 migration/0           </span><br><span class="line">    8 root      20   0       0      0      0 S  0.0  0.0   0:00.00 rcu_bh                </span><br><span class="line">    9 root      20   0       0      0      0 S  0.0  0.0   0:00.52 rcu_sched             </span><br><span class="line">   10 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 lru-add-drain         </span><br><span class="line">   11 root      rt   0       0      0      0 S  0.0  0.0   0:00.00 watchdog/0            </span><br><span class="line">   13 root      20   0       0      0      0 S  0.0  0.0   0:00.00 kdevtmpfs             </span><br><span class="line">   14 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 netns                 </span><br><span class="line">   15 root      20   0       0      0      0 S  0.0  0.0   0:00.00 khungtaskd            </span><br><span class="line">   16 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 writeback             </span><br><span class="line">   17 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 kintegrityd           </span><br><span class="line">   18 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 bioset                </span><br><span class="line">   19 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 bioset                </span><br><span class="line">   20 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 bioset</span><br></pre></td></tr></table></figure>
+<p>这是top的交互命令<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">d： 更改刷新频率</span><br><span class="line">f： 增加或减少要显示的列(选中的会变成大写并加*号)</span><br><span class="line">F： 选择排序的列</span><br><span class="line">h： 显示帮助画面</span><br><span class="line">H： 显示线程</span><br><span class="line">i： 忽略闲置和僵死进程</span><br><span class="line">k： 通过给予一个PID和一个signal来终止一个进程。（默认signal为15。在安全模式中此命令被屏蔽）</span><br><span class="line">l:  显示平均负载以及启动时间（即显示影藏第一行）</span><br><span class="line">m： 显示内存信息</span><br><span class="line">M： 根据内存资源使用大小进行排序</span><br><span class="line">N： 按PID由高到低排列</span><br><span class="line">o： 改变列显示的顺序</span><br><span class="line">O： 选择排序的列，与F完全相同</span><br><span class="line">P： 根据CPU资源使用大小进行排序</span><br><span class="line">q： 退出top命令</span><br><span class="line">r： 修改进程的nice值(优先级)。优先级默认为10，正值使优先级降低，反之则提高的优先级</span><br><span class="line">s： 设置刷新频率（默认单位为秒，如有小数则换算成ms）。默认值是5s，输入0值则系统将不断刷新</span><br><span class="line">S： 累计模式（把已完成或退出的子进程占用的CPU时间累计到父进程的MITE+ ）</span><br><span class="line">T： 根据进程使用CPU的累积时间排序</span><br><span class="line">t： 显示进程和CPU状态信息（即显示影藏CPU行）</span><br><span class="line">u： 指定用户进程</span><br><span class="line">W： 将当前设置写入~/.toprc文件，下次启动自动调用toprc文件的设置</span><br><span class="line">&lt;： 向前翻页</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">： 向后翻页</span></span><br><span class="line">?： 显示帮助画面</span><br><span class="line">1(数字1)： 显示每个CPU的详细情况</span><br></pre></td></tr></table></figure></p>
+<h2 id="vmstat"><a href="#vmstat" class="headerlink" title="vmstat"></a>vmstat</h2><p><code>vmstat</code> 主要用来查看cpu，但是不仅限于cpu。</p>
+<p><code>vmstat -n 2 3</code> 代表每隔2秒采集一次，共采集3次。主要观察procs和cpu的指标。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@dev ~]# vmstat -n 2 3</span><br><span class="line">procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----</span><br><span class="line"> r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st</span><br><span class="line"> 1  0      0 1117248   2108 377076    0    0   236    12  121  240  2  1 97  0  0</span><br><span class="line"> 1  0      0 1117248   2108 377092    0    0     0     1   85  182  0  0 100  0  0</span><br><span class="line"> 0  0      0 1117248   2108 377092    0    0     0     0  209  392  6  8 86  0  0</span><br></pre></td></tr></table></figure>
+<p>主要观察两个参数的值</p>
+<ul>
+<li><code>proc</code> <ul>
+<li><code>r</code> : 运行和等待CPU时间片的进程数，原则上1核的CPU的运行队列不要超过2，否则代表系统压力大。</li>
+<li><code>b</code> : 等待资源的进程数，</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><code>cpu</code><ul>
+<li><code>us</code> : 用户进程消耗的CPU时间百分比，长期大于50%则需要优化程序。</li>
+<li><code>sy</code> : 内核进程消耗的CPU时间百分比。</li>
+</ul>
+</li>
+</ul>
+<h2 id="free"><a href="#free" class="headerlink" title="free"></a>free</h2><p><code>free</code>用于查看内存使用情况<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# free -m</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:           1838         358        1099           8         380        1329</span><br><span class="line">Swap:          2047           0        2047</span><br></pre></td></tr></table></figure></p>
+<h2 id="df"><a href="#df" class="headerlink" title="df"></a>df</h2><p><code>df</code>用于查看磁盘剩余空间</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 908M     0  908M   0% /dev</span><br><span class="line">tmpfs                    920M     0  920M   0% /dev/shm</span><br><span class="line">tmpfs                    920M  8.6M  911M   1% /run</span><br><span class="line">tmpfs                    920M     0  920M   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root   17G  3.3G   14G  20% /</span><br><span class="line">/dev/sda1               1014M  191M  824M  19% /boot</span><br><span class="line">tmpfs                    184M     0  184M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+<h2 id="iostat"><a href="#iostat" class="headerlink" title="iostat"></a>iostat</h2><p><code>iostat</code>用于磁盘I/O性能评估，如果没有这个命令需要先安装<code>yum install sysstat</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# iostat -xdk 2 3</span><br><span class="line">Linux 3.10.0-1062.4.1.el7.x86_64 (dev)  01/14/2020      _x86_64_        (1 CPU)</span><br><span class="line"></span><br><span class="line">Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util</span><br><span class="line">sda               0.00     0.01    0.28    0.15    13.48     2.25    72.09     0.00    1.36    1.22    1.64   0.82   0.04</span><br><span class="line">dm-0              0.00     0.00    0.22    0.12    12.64     2.20    85.20     0.00    1.67    1.31    2.33   0.92   0.03</span><br><span class="line">dm-1              0.00     0.00    0.00    0.00     0.06     0.00    50.09     0.00    0.42    0.42    0.00   0.33   0.00</span><br><span class="line"></span><br><span class="line">Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util</span><br><span class="line">sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">dm-1              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line"></span><br><span class="line">Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util</span><br><span class="line">sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br><span class="line">dm-1              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00</span><br></pre></td></tr></table></figure>
+<p>主要看两个参数</p>
+<ul>
+<li><code>await</code> : I/O请求的平均等待时间，单位毫秒，值越小性能越好。</li>
+<li><code>util</code> : 一秒中有百分之几的时间用于I/O操作。接近100%时，表示磁盘带宽跑满，需要优化程序或者增加磁盘。</li>
+</ul>
+<h2 id="ifstat"><a href="#ifstat" class="headerlink" title="ifstat"></a>ifstat</h2><p><code>ifstat</code>用于查看网络I/O，最好先卸载在安装</p>
+<p>卸载<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# find / -name ifstat</span><br><span class="line">/usr/sbin/ifstat</span><br><span class="line">[root@dev ~]# rm -rf /usr/sbin/ifstat</span><br></pre></td></tr></table></figure></p>
+<p>安装，需要有gcc<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget http://distfiles.macports.org/ifstat/ifstat-1.1.tar.gz</span><br><span class="line">tar xzvf ifstat-1.1.tar.gz</span><br><span class="line">cd ifstat-1.1</span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp istate /usr/sbin/</span><br></pre></td></tr></table></figure></p>
+<p>查看各个网卡进出的网络负载情况<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">     enp0s3              enp0s8             docker0         br-adc7174eea54  </span><br><span class="line">KB/s in  KB/s out   KB/s in  KB/s out   KB/s in  KB/s out   KB/s in  KB/s out</span><br><span class="line">   0.00      0.00      0.06      0.28      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.48      0.43      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.12      0.26      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br><span class="line">   0.00      0.00      0.06      0.20      0.00      0.00      0.00      0.00</span><br></pre></td></tr></table></figure></p>
+<h2 id="如何定位生产CPU占用过高？"><a href="#如何定位生产CPU占用过高？" class="headerlink" title="如何定位生产CPU占用过高？"></a>如何定位生产CPU占用过高？</h2><ol>
+<li>先用<code>top</code>命令找出占比最高的进程,根据cpu使用百分比排序，<code>P</code>或者<code>shift+p</code>。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">top - 09:30:12 up 11:11,  5 users,  load average: 0.31, 0.17, 0.10</span><br><span class="line">Tasks: 101 total,   1 running, 100 sleeping,   0 stopped,   0 zombie</span><br><span class="line"><span class="meta">%</span><span class="bash">Cpu(s):  3.8 us,  3.8 sy,  0.0 ni, 92.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span></span><br><span class="line">KiB Mem :  1882152 total,   761932 free,   435836 used,   684384 buff/cache</span><br><span class="line">KiB Swap:  2097148 total,  2097148 free,        0 used.  1265840 avail Mem </span><br><span class="line"></span><br><span class="line">  PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND               </span><br><span class="line"> 5262 root      20   0 2472080  40824  12132 S 10.0  2.2   0:11.31 java                  </span><br><span class="line"> 3225 root      20   0  160160   6740   4384 S  0.7  0.4   0:00.67 sshd                  </span><br><span class="line"> 5311 root      20   0  161888   2176   1540 R  0.3  0.1   0:00.37 top                   </span><br><span class="line">    1 root      20   0  128076   6728   4192 S  0.0  0.4   0:02.36 systemd               </span><br><span class="line">    2 root      20   0       0      0      0 S  0.0  0.0   0:00.01 kthreadd              </span><br><span class="line">    4 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 kworker/0:0H          </span><br><span class="line">    5 root      20   0       0      0      0 S  0.0  0.0   0:00.49 kworker/u2:0          </span><br><span class="line">    6 root      20   0       0      0      0 S  0.0  0.0   0:01.93 ksoftirqd/0           </span><br><span class="line">    7 root      rt   0       0      0      0 S  0.0  0.0   0:00.00 migration/0           </span><br><span class="line">    8 root      20   0       0      0      0 S  0.0  0.0   0:00.00 rcu_bh                </span><br><span class="line">    9 root      20   0       0      0      0 S  0.0  0.0   0:00.98 rcu_sched             </span><br><span class="line">   10 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 lru-add-drain         </span><br><span class="line">   11 root      rt   0       0      0      0 S  0.0  0.0   0:01.43 watch</span><br></pre></td></tr></table></figure>
+<p>目前可以知道pid为<code>5262</code>这个进程占用的cpu百分比最高。</p>
+<ol start="2">
+<li>用<code>ps -ef</code> 或者 <code>jps</code> 定位是哪一个后台程序惹的事。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# jps -l | grep 5262</span><br><span class="line">5262 Demo</span><br><span class="line">[root@dev ~]# ps -ef | grep 5262 | grep -v grep</span><br><span class="line">root      5262  3241  6 09:26 pts/2    00:00:37 java Demo</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>定位到具体的线程或者代码</li>
+</ol>
+<p>使用命令<code>ps -mp [pid] -o THREAD,tid,time</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# ps -mp 5262  -o THREAD,tid,time</span><br><span class="line">USER     %CPU PRI SCNT WCHAN  USER SYSTEM   TID     TIME</span><br><span class="line">root      6.5   -    - -         -      -     - 00:00:44</span><br><span class="line">root      0.0  19    - futex_    -      -  5262 00:00:00</span><br><span class="line">root      6.3  19    - n_tty_    -      -  5263 00:00:43</span><br><span class="line">root      0.0  19    - futex_    -      -  5264 00:00:00</span><br><span class="line">root      0.0  19    - futex_    -      -  5265 00:00:00</span><br><span class="line">root      0.0  19    - futex_    -      -  5266 00:00:00</span><br><span class="line">root      0.0  19    - futex_    -      -  5267 00:00:00</span><br><span class="line">root      0.0  19    - futex_    -      -  5268 00:00:00</span><br><span class="line">root      0.0  19    - futex_    -      -  5269 00:00:00</span><br><span class="line">root      0.0  19    - futex_    -      -  5270 00:00:00</span><br><span class="line">root      0.1  19    - futex_    -      -  5271 00:00:01</span><br></pre></td></tr></table></figure>
+<p>可以看到pid为<code>5262</code>的进程下tid为<code>5263</code>线程占用CPU最多。</p>
+<ol start="4">
+<li>将线程id转换为16进制格式，英文小写</li>
+</ol>
+<p>因为程序堆栈中是使用16进制来记录的，<code>5263</code>的16进制为<code>0x148f</code></p>
+<ol start="5">
+<li>打印程序运行堆栈信息</li>
+</ol>
+<p>使用命令<code>jstack [pid] | grep [tid] -A60</code>,tid为16进制线程id英文小写，打印出前60行信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# jstack 5262 | grep 0x148f  -A60</span><br><span class="line">"main" #1 prio=5 os_prio=0 tid=0x00007fed4804b800 nid=0x148f runnable [0x00007fed51b18000]</span><br><span class="line">   java.lang.Thread.State: RUNNABLE</span><br><span class="line">        at java.io.FileOutputStream.writeBytes(Native Method)</span><br><span class="line">        at java.io.FileOutputStream.write(FileOutputStream.java:326)</span><br><span class="line">        at java.io.BufferedOutputStream.flushBuffer(BufferedOutputStream.java:82)</span><br><span class="line">        at java.io.BufferedOutputStream.flush(BufferedOutputStream.java:140)</span><br><span class="line">        - locked &lt;0x00000000ecd68b00&gt; (a java.io.BufferedOutputStream)</span><br><span class="line">        at java.io.PrintStream.write(PrintStream.java:482)</span><br><span class="line">        - locked &lt;0x00000000ecd60c38&gt; (a java.io.PrintStream)</span><br><span class="line">        at sun.nio.cs.StreamEncoder.writeBytes(StreamEncoder.java:221)</span><br><span class="line">        at sun.nio.cs.StreamEncoder.implFlushBuffer(StreamEncoder.java:291)</span><br><span class="line">        at sun.nio.cs.StreamEncoder.flushBuffer(StreamEncoder.java:104)</span><br><span class="line">        - locked &lt;0x00000000ecd68b40&gt; (a java.io.OutputStreamWriter)</span><br><span class="line">        at java.io.OutputStreamWriter.flushBuffer(OutputStreamWriter.java:185)</span><br><span class="line">        at java.io.PrintStream.write(PrintStream.java:527)</span><br><span class="line">        - eliminated &lt;0x00000000ecd60c38&gt; (a java.io.PrintStream)</span><br><span class="line">        at java.io.PrintStream.print(PrintStream.java:597)</span><br><span class="line">        at java.io.PrintStream.println(PrintStream.java:736)</span><br><span class="line">        - locked &lt;0x00000000ecd60c38&gt; (a java.io.PrintStream)</span><br><span class="line">        at Demo.main(Demo.java:4)</span><br><span class="line"></span><br><span class="line">"VM Thread" os_prio=0 tid=0x00007fed480cb800 nid=0x1490 runnable </span><br><span class="line"></span><br><span class="line">"VM Periodic Task Thread" os_prio=0 tid=0x00007fed4811a000 nid=0x1497 waiting on condition </span><br><span class="line"></span><br><span class="line">JNI global references: 5</span><br></pre></td></tr></table></figure>
+<p>可以看到线程信息，代码在Demo类的main方法，Demo.java这个文件的第4行，然后去看这个方法以及这一行代码相关的逻辑，加以分析应该就可以找出原因了。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2020-01-13, 22:10:15</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2020/01/13/linux-prof-important-cmd/" title="Linux常用命令">https://ruanzz.github.io/2020/01/13/linux-prof-important-cmd/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2020/01/13/linux-prof-important-cmd/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2020/01/27/mamba/">
+                    老大走好
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2020/01/05/2019-review/">
+                    「迟到」的年终总结
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#top"><span class="toc-number">1.</span> <span class="toc-text">top</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#vmstat"><span class="toc-number">2.</span> <span class="toc-text">vmstat</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#free"><span class="toc-number">3.</span> <span class="toc-text">free</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#df"><span class="toc-number">4.</span> <span class="toc-text">df</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#iostat"><span class="toc-number">5.</span> <span class="toc-text">iostat</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ifstat"><span class="toc-number">6.</span> <span class="toc-text">ifstat</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何定位生产CPU占用过高？"><span class="toc-number">7.</span> <span class="toc-text">如何定位生产CPU占用过高？</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"Linux常用命令　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2020/01/27/mamba/" title="上一篇: 老大走好">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2020/01/05/2019-review/" title="下一篇: 「迟到」的年终总结">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>

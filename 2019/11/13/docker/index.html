@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Ryan" />
+
+
+
+<meta name="description" content="Docker是一种容器引擎，主要用于应用的打包和运行，保证环境的一致性，目前与微服务配合一起使用的比较多。Docker官方说法是与集装箱功能类似，操作对象是应用，对应用进行Build -&amp;gt; Share -&amp;gt; Run。目前Docker为Kubernetes的默认容器引擎，当然还可以选择rkt，后续会写Kubernetes系列文章，本文先介绍一下Docker，为后续文章做一下铺垫。">
+<meta name="keywords" content="Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker">
+<meta property="og:url" content="https://ruanzz.github.io/2019/11/13/docker/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Blog">
+<meta property="og:description" content="Docker是一种容器引擎，主要用于应用的打包和运行，保证环境的一致性，目前与微服务配合一起使用的比较多。Docker官方说法是与集装箱功能类似，操作对象是应用，对应用进行Build -&amp;gt; Share -&amp;gt; Run。目前Docker为Kubernetes的默认容器引擎，当然还可以选择rkt，后续会写Kubernetes系列文章，本文先介绍一下Docker，为后续文章做一下铺垫。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-05T16:55:23.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker">
+<meta name="twitter:description" content="Docker是一种容器引擎，主要用于应用的打包和运行，保证环境的一致性，目前与微服务配合一起使用的比较多。Docker官方说法是与集装箱功能类似，操作对象是应用，对应用进行Build -&amp;gt; Share -&amp;gt; Run。目前Docker为Kubernetes的默认容器引擎，当然还可以选择rkt，后续会写Kubernetes系列文章，本文先介绍一下Docker，为后续文章做一下铺垫。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Ryan&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/asset/img/favicon.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Docker | Ryan&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Ryan</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">程序员的自我修养</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="Search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/whoami/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Ryan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/asset/img/favicon.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Ryan</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">程序员的自我修养</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/whoami/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-docker" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/11/13/docker/" class="article-date">
+      <time datetime="2019-11-13T21:22:13.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Docker
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/云计算/">云计算</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/">Docker</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>Docker是一种容器引擎，主要用于应用的打包和运行，保证环境的一致性，目前与微服务配合一起使用的比较多。Docker官方说法是与集装箱功能类似，操作对象是应用，对应用进行Build -&gt; Share -&gt; Run。目前Docker为Kubernetes的默认容器引擎，当然还可以选择rkt，后续会写Kubernetes系列文章，本文先介绍一下Docker，为后续文章做一下铺垫。</p>
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这里用CentOS7.7来做宿主机做演示，官方文档写的很详细，可以参照官方文档来操作。</p>
+<p>首先关闭防火墙和selinux</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld &amp;&amp; systemctl disable firewalld</span><br><span class="line">sed -i 's/enforcing/disabled/' /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure>
+<p>添加aliyun提供的Docker源，加速docker-ce的下载<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -O /etc/yum.repos.d/docker-ce.repo  https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure></p>
+<p>直接通过yum安装docker-ce即可<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker-ce-18.06.1.ce-3.el7 -y</span><br></pre></td></tr></table></figure></p>
+<p>启动docker，并设置开机启动<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable docker &amp;&amp; systemctl start docker</span><br></pre></td></tr></table></figure></p>
+<p>查看docker版本<code>docker version</code>以及docker信息<code>docker info</code>。</p>
+<p>先来回顾一下我们之前说的内容，Docker主要用于应用的打包和运行，打包其实就是构建镜像，运行就是根据打包出来的镜像运行一个容器。所以下面我们来看一下镜像和容器。</p>
+<h2 id="镜像"><a href="#镜像" class="headerlink" title="镜像"></a>镜像</h2><p>镜像，与OpenStack，VMware这些说的镜像是同一个东西吗？其实他们的作用是类似的，但是实现区别非常大，OpenStack和VMware的镜像是一个完整的操作系统，Docker的镜像是一个不包含Linux内核的精简系统，这个与他们各自的架构有关。</p>
+<p>Docker官方默认提供了一个公共的镜像仓库Docker Hub，我们通过<code>docker pull</code>从Docker Hub上拉取镜像。但是这个是国外，虽然可以访问，但是比较慢，所以一般都会将镜像仓库设置为<code>https://registry.docker-cn.com</code>或者aliyun提供的镜像仓库<code>https://uxk0ognt.mirror.aliyuncs.com</code>。</p>
+<p>修改Docker镜像仓库为aliyun,加速镜像拉取<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tee /etc/docker/daemon.json &lt;&lt;-'EOF'</span><br><span class="line">&#123;</span><br><span class="line">  "registry-mirrors": ["https://uxk0ognt.mirror.aliyuncs.com"]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>重新加载并重启Docker<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload &amp;&amp; systemctl restart docker</span><br></pre></td></tr></table></figure></p>
+<p>拉取nginx的最新最新镜像到本地,不添加版本号默认拉取最新<code>latest</code>版本，需要特定版本指定版本即可。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker pull nginx</span><br><span class="line">Using default tag: latest</span><br><span class="line">latest: Pulling from library/nginx                                                        8d691f585fa8: Pull complete                                                               5b07f4e08ad0: Pull complete                                                               abc291867bca: Pull complete </span><br><span class="line">Digest: sha256:922c815aa4df050d4df476e92daed4231f466acc8ee90e0e774951b0fd7195a4</span><br><span class="line">Status: Downloaded newer image for nginx:latest</span><br></pre></td></tr></table></figure></p>
+<p>查看本地镜像列表<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@dev ~]# docker image ls</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              540a289bab6c        3 weeks ago         126MB</span><br></pre></td></tr></table></figure></p>
+<p>镜像是分层的，可以查看镜像的分层信息<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker history nginx</span><br><span class="line">IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT</span><br><span class="line">540a289bab6c        3 weeks ago         /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B                  </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c #(nop)  STOPSIGNAL SIGTERM           0B                  </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c #(nop)  EXPOSE 80                    0B                  </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c ln -sf /dev/stdout /var/log/nginx…   22B                 </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c set -x     &amp;&amp; addgroup --system -…   57MB                </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c #(nop)  ENV PKG_RELEASE=1~buster     0B                  </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c #(nop)  ENV NJS_VERSION=0.3.6        0B                  </span><br><span class="line">&lt;missing&gt;           3 weeks ago         /bin/sh -c #(nop)  ENV NGINX_VERSION=1.17.5     0B                  </span><br><span class="line">&lt;missing&gt;           4 weeks ago         /bin/sh -c #(nop)  LABEL maintainer=NGINX Do…   0B                  </span><br><span class="line">&lt;missing&gt;           4 weeks ago         /bin/sh -c #(nop)  CMD ["bash"]                 0B                  </span><br><span class="line">&lt;missing&gt;           4 weeks ago         /bin/sh -c #(nop) ADD file:74b2987cacab5a6b0…   69.2MB</span><br></pre></td></tr></table></figure></p>
+<p>查看镜像详情<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker inspect nginx</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        "Id": "sha256:540a289bab6cb1bf880086a9b803cf0c4cefe38cbb5cdefa199b69614525199f",</span><br><span class="line">        "RepoTags": [</span><br><span class="line">            "nginx:latest"</span><br><span class="line">        ],</span><br><span class="line">        "RepoDigests": [</span><br><span class="line">            "nginx@sha256:922c815aa4df050d4df476e92daed4231f466acc8ee90e0e774951b0fd7195a4"</span><br><span class="line">        ],</span><br><span class="line">        "Parent": "",</span><br><span class="line">        "Comment": "",</span><br><span class="line">        "Created": "2019-10-23T00:26:03.830480202Z",</span><br><span class="line">        "Container": "77b8bfc5e16274066a5d4c14915ea5e7387c062f8540cd970c54e9b6e38b1011",</span><br><span class="line">        "ContainerConfig": &#123;</span><br><span class="line">            "Hostname": "77b8bfc5e162",</span><br><span class="line">            "Domainname": "",</span><br><span class="line">            "User": "",</span><br><span class="line">            "AttachStdin": false,</span><br><span class="line">            "AttachStdout": false,</span><br><span class="line">            "AttachStderr": false,</span><br><span class="line">            "ExposedPorts": &#123;</span><br><span class="line">                "80/tcp": &#123;&#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            "Tty": false,</span><br><span class="line">            "OpenStdin": false,</span><br><span class="line">            "StdinOnce": false,</span><br><span class="line">            "Env": [</span><br><span class="line">                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",</span><br><span class="line">                "NGINX_VERSION=1.17.5",</span><br><span class="line">                "NJS_VERSION=0.3.6",</span><br><span class="line">                "PKG_RELEASE=1~buster"</span><br><span class="line">            ],</span><br><span class="line">            "Cmd": [</span><br><span class="line">                "/bin/sh",</span><br><span class="line">                "-c",</span><br><span class="line">                "#(nop) ",</span><br><span class="line">                "CMD [\"nginx\" \"-g\" \"daemon off;\"]"</span><br><span class="line">            ],</span><br><span class="line">            "ArgsEscaped": true,</span><br><span class="line">            "Image": "sha256:2e2fa75c52fdfe182fb66455d6db04849c683ef01d14a526211ba37831c66791",</span><br><span class="line">            "Volumes": null,</span><br><span class="line">            "WorkingDir": "",</span><br><span class="line">            "Entrypoint": null,</span><br><span class="line">            "OnBuild": null,</span><br><span class="line">            "Labels": &#123;</span><br><span class="line">                "maintainer": "NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;"</span><br><span class="line">            &#125;,</span><br><span class="line">            "StopSignal": "SIGTERM"</span><br><span class="line">        &#125;,</span><br><span class="line">        "DockerVersion": "18.06.1-ce",</span><br><span class="line">        "Author": "",</span><br><span class="line">        "Config": &#123;</span><br><span class="line">            "Hostname": "",</span><br><span class="line">            "Domainname": "",</span><br><span class="line">            "User": "",</span><br><span class="line">            "AttachStdin": false,</span><br><span class="line">            "AttachStdout": false,</span><br><span class="line">            "AttachStderr": false,</span><br><span class="line">            "ExposedPorts": &#123;</span><br><span class="line">                "80/tcp": &#123;&#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            "Tty": false,</span><br><span class="line">            "OpenStdin": false,</span><br><span class="line">            "StdinOnce": false,</span><br><span class="line">            "Env": [</span><br><span class="line">                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",</span><br><span class="line">                "NGINX_VERSION=1.17.5",</span><br><span class="line">                "NJS_VERSION=0.3.6",</span><br><span class="line">                "PKG_RELEASE=1~buster"</span><br><span class="line">            ],</span><br><span class="line">            "Cmd": [</span><br><span class="line">                "nginx",</span><br><span class="line">                "-g",</span><br><span class="line">                "daemon off;"</span><br><span class="line">            ],</span><br><span class="line">            "ArgsEscaped": true,</span><br><span class="line">            "Image": "sha256:2e2fa75c52fdfe182fb66455d6db04849c683ef01d14a526211ba37831c66791",</span><br><span class="line">            "Volumes": null,</span><br><span class="line">            "WorkingDir": "",</span><br><span class="line">            "Entrypoint": null,</span><br><span class="line">            "OnBuild": null,</span><br><span class="line">            "Labels": &#123;</span><br><span class="line">                "maintainer": "NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;"</span><br><span class="line">            &#125;,</span><br><span class="line">            "StopSignal": "SIGTERM"</span><br><span class="line">        &#125;,</span><br><span class="line">        "Architecture": "amd64",</span><br><span class="line">        "Os": "linux",</span><br><span class="line">        "Size": 126215561,</span><br><span class="line">        "VirtualSize": 126215561,</span><br><span class="line">        "GraphDriver": &#123;</span><br><span class="line">            "Data": &#123;</span><br><span class="line">                "LowerDir": "/var/lib/docker/overlay2/073913f9b86f825ee0431de0bfdd01703b4410a87470009ba9a2ac96353c790b/diff:/var/lib/docker/overlay2/cea7c862cabda73f6d9395eb93b4c48a4b3798629d6663bd00e2d805fc6b02a4/diff",</span><br><span class="line">                "MergedDir": "/var/lib/docker/overlay2/9ff16a2be5a6c4c32e4c27a87520be3f117486be9d89718f68799a58c25333fc/merged",</span><br><span class="line">                "UpperDir": "/var/lib/docker/overlay2/9ff16a2be5a6c4c32e4c27a87520be3f117486be9d89718f68799a58c25333fc/diff",</span><br><span class="line">                "WorkDir": "/var/lib/docker/overlay2/9ff16a2be5a6c4c32e4c27a87520be3f117486be9d89718f68799a58c25333fc/work"</span><br><span class="line">            &#125;,</span><br><span class="line">            "Name": "overlay2"</span><br><span class="line">        &#125;,</span><br><span class="line">        "RootFS": &#123;</span><br><span class="line">            "Type": "layers",</span><br><span class="line">            "Layers": [</span><br><span class="line">                "sha256:b67d19e65ef653823ed62a5835399c610a40e8205c16f839c5cc567954fcf594",</span><br><span class="line">                "sha256:6eaad811af0237b78ba8b44a282d1564259d90007d628a032c5df7e3e2bbb613",</span><br><span class="line">                "sha256:a89b8f05da3a2cbe459ef3fecfec8076fd0a7568db81f9164147b6f642e2dadf"</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        "Metadata": &#123;</span><br><span class="line">            "LastTagTime": "0001-01-01T00:00:00Z"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>删除镜像<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker image rm nginx</span><br><span class="line">Untagged: nginx:latest</span><br><span class="line">Untagged: nginx@sha256:922c815aa4df050d4df476e92daed4231f466acc8ee90e0e774951b0fd7195a4</span><br><span class="line">Deleted: sha256:540a289bab6cb1bf880086a9b803cf0c4cefe38cbb5cdefa199b69614525199f</span><br><span class="line">Deleted: sha256:ab18af7cee69bfb22c1771e54d5e0e68b1a1bf57bb46516142da0380b1771f4a</span><br><span class="line">Deleted: sha256:02f7daf1e14541cd61a3dda1a61cc0f78fee8de2984d488b8ba5bbd3cbad9b57</span><br><span class="line">Deleted: sha256:b67d19e65ef653823ed62a5835399c610a40e8205c16f839c5cc567954fcf594</span><br></pre></td></tr></table></figure></p>
+<p>删除所有镜像<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker image rm $(docker image ls  -aq)</span><br><span class="line">Untagged: busybox:latest</span><br><span class="line">Untagged: busybox@sha256:1303dbf110c57f3edf68d9f5a16c082ec06c4cf7604831669faf2c712260b5a0</span><br><span class="line">Deleted: sha256:020584afccce44678ec82676db80f68d50ea5c766b6e9d9601f7b5fc86dfb96d</span><br><span class="line">Deleted: sha256:1da8e4c8d30765bea127dc2f11a17bc723b59480f4ab5292edb00eb8eb1d96b1</span><br></pre></td></tr></table></figure></p>
+<p>给镜像打标签，镜像列表多了一条记录，镜像ID还是一样的。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">busybox             latest              020584afccce        2 weeks ago         1.22MB</span><br><span class="line">nginx               latest              540a289bab6c        3 weeks ago         126MB</span><br><span class="line">[root@dev ~]# docker tag busybox:latest busybox:v1.0</span><br><span class="line">[root@dev ~]# docker image ls</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">busybox             latest              020584afccce        2 weeks ago         1.22MB</span><br><span class="line">busybox             v1.0                020584afccce        2 weeks ago         1.22MB</span><br><span class="line">nginx               latest              540a289bab6c        3 weeks ago         126MB</span><br></pre></td></tr></table></figure></p>
+<p>导出镜像<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker save busybox:v1.0 &gt;  busybox-1.0.tar</span><br><span class="line">[root@dev ~]# ls</span><br><span class="line">anaconda-ks.cfg  busybox-1.0.tar</span><br></pre></td></tr></table></figure></p>
+<p>载入镜像<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker rmi busybox:v1.0</span><br><span class="line">Untagged: busybox:v1.0</span><br><span class="line">Deleted: sha256:020584afccce44678ec82676db80f68d50ea5c766b6e9d9601f7b5fc86dfb96d</span><br><span class="line">Deleted: sha256:1da8e4c8d30765bea127dc2f11a17bc723b59480f4ab5292edb00eb8eb1d96b1</span><br><span class="line">[root@dev ~]# docker image ls</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx               latest              540a289bab6c        3 weeks ago         126MB</span><br><span class="line">[root@dev ~]# docker load &lt; busybox-1.0.tar </span><br><span class="line">1da8e4c8d307: Loading layer  1.437MB/1.437MB</span><br><span class="line">Loaded image: busybox:v1.0</span><br><span class="line">[root@dev ~]# docker image ls</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">busybox             v1.0                020584afccce        2 weeks ago         1.22MB</span><br><span class="line">nginx               latest              540a289bab6c        3 weeks ago         126MB</span><br></pre></td></tr></table></figure></p>
+<p>构建镜像 <code>docker commit</code> 和 <code>docker build</code>，后边在Dockerfile详细讲解。</p>
+<h2 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h2><p>启动一个容器，<code>-i</code>交互式启动，<code>-t</code>分配一个伪终端，<code>-d</code>后台运行，<code>--name</code>给容器起一个名称，启动之后返回容器长ID值。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker run  -itd --name busy-service busybox:v1.0</span><br><span class="line">1479e27334802659474255201a6f125d38c3e568e57b74aa828a2c94b8602d4e</span><br></pre></td></tr></table></figure></p>
+<p>查看当前运行的容器,所有的容器加上<code>-a</code><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker ps </span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">1479e2733480        busybox:v1.0        "sh"                12 hours ago        Up 12 hours                             busy-service</span><br></pre></td></tr></table></figure></p>
+<p>进入容器<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker attach busy-service</span><br><span class="line">/ # ls</span><br><span class="line">bin   dev   etc   home  proc  root  sys   tmp   usr   var</span><br><span class="line">/ #</span><br></pre></td></tr></table></figure></p>
+<p>退出容器可以输入<code>exit</code>或者使用快捷键<code>Ctrl+p+q</code>。这样子退出终端之后容器也就退出了，所以铜通常不会这样子进入容器，一般是使用<code>docke exec</code>进入和退出。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">[root@dev ~]# docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES</span><br><span class="line">1479e2733480        busybox:v1.0        "sh"                12 hours ago        Exited (0) 5 minutes ago                       busy-service</span><br><span class="line">[root@dev ~]# docker start busy-service</span><br><span class="line">busy-service</span><br><span class="line">[root@dev ~]# docker exec -it busy-service sh</span><br><span class="line">/ # ls</span><br><span class="line">bin   dev   etc   home  proc  root  sys   tmp   usr   var</span><br><span class="line">/ # exit</span><br><span class="line">[root@dev ~]# docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">1479e2733480        busybox:v1.0        "sh"                12 hours ago        Up 22 seconds                           busy-service</span><br></pre></td></tr></table></figure>
+<p>映射容器端口到使用主机端口<code>-p hostPort:containerPort</code><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker run -itd -p 8080:80  --name nginx nginx:latest        </span><br><span class="line">00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336</span><br><span class="line">[root@dev ~]# curl localhost:8080</span><br><span class="line">&lt;!DOCTYPE html&gt;                                                                           &lt;html&gt;</span><br><span class="line">&lt;head&gt;                                                                                    &lt;title&gt;Welcome to nginx!&lt;/title&gt;</span><br><span class="line">&lt;style&gt;</span><br><span class="line">    body &#123;</span><br><span class="line">        width: 35em;</span><br><span class="line">        margin: 0 auto;</span><br><span class="line">        font-family: Tahoma, Verdana, Arial, sans-serif;</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;If you see this page, the nginx web server is successfully installed and               working. Further configuration is required.&lt;/p&gt;</span><br><span class="line">                                                                                          &lt;p&gt;For online documentation and support please refer to</span><br><span class="line">&lt;a href="http://nginx.org/"&gt;nginx.org&lt;/a&gt;.&lt;br/&gt;</span><br><span class="line">Commercial support is available at</span><br><span class="line">&lt;a href="http://nginx.com/"&gt;nginx.com&lt;/a&gt;.&lt;/p&gt;</span><br><span class="line"></span><br><span class="line">&lt;p&gt;&lt;em&gt;Thank you for using nginx.&lt;/em&gt;&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure></p>
+<p>查看容器日志,<code>-f</code>动态刷新<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker logs -f nginx</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:28:21 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br></pre></td></tr></table></figure></p>
+<p>多请求几次nginx,发现日志不断刷新<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker logs -f nginx</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:28:21 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:32:49 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:32:54 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:32:54 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:32:55 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br><span class="line">172.17.0.1 - - [15/Nov/2019:00:32:55 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.29.0" "-"</span><br></pre></td></tr></table></figure></p>
+<p>在使用容器跑业务的时候，运行了一段时间就会发现容器宿主机存储不够了，这种时候有可能就是日志文件太大了，docker容器运行的日志文件在宿主机的目录<code>/var/lib/docker/containers</code>,以JSON格式来存储。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@dev 00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336]# pwd</span><br><span class="line">/var/lib/docker/containers/00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336</span><br><span class="line">[root@dev 00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336]# ll</span><br><span class="line">total 28</span><br><span class="line">-rw-r-----. 1 root root 1026 Nov 15 08:32 00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336-json.log</span><br><span class="line">drwx------. 2 root root    6 Nov 15 08:28 checkpoints</span><br><span class="line">-rw-------. 1 root root 2902 Nov 15 08:28 config.v2.json</span><br><span class="line">-rw-r--r--. 1 root root 1463 Nov 15 08:28 hostconfig.json                                 -rw-r--r--. 1 root root   13 Nov 15 08:28 hostname</span><br><span class="line">-rw-r--r--. 1 root root  174 Nov 15 08:28 hosts</span><br><span class="line">drwx------. 3 root root   17 Nov 15 08:28 mounts</span><br><span class="line">-rw-r--r--. 1 root root   81 Nov 15 08:28 resolv.conf</span><br><span class="line">-rw-r--r--. 1 root root   71 Nov 15 08:28 resolv.conf.hash</span><br><span class="line">[root@dev 00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336]# more 00e1743963f38a0eae3c05fe94d8ae9974ea30cf300aae86b257951ab4ff4336-json.log </span><br><span class="line">&#123;"log":"172.17.0.1 - - [15/Nov/2019:00:28:21 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"cur</span><br><span class="line">l/7.29.0\" \"-\"\r\n","stream":"stdout","time":"2019-11-15T00:28:21.759024147Z"&#125;</span><br><span class="line">&#123;"log":"172.17.0.1 - - [15/Nov/2019:00:32:49 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"cur</span><br><span class="line">l/7.29.0\" \"-\"\r\n","stream":"stdout","time":"2019-11-15T00:32:49.231094319Z"&#125;</span><br><span class="line">&#123;"log":"172.17.0.1 - - [15/Nov/2019:00:32:54 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"cur</span><br><span class="line">l/7.29.0\" \"-\"\r\n","stream":"stdout","time":"2019-11-15T00:32:54.030918643Z"&#125;</span><br><span class="line">&#123;"log":"172.17.0.1 - - [15/Nov/2019:00:32:54 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"cur</span><br><span class="line">l/7.29.0\" \"-\"\r\n","stream":"stdout","time":"2019-11-15T00:32:54.677989285Z"&#125;          &#123;"log":"172.17.0.1 - - [15/Nov/2019:00:32:55 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"cur</span><br><span class="line">l/7.29.0\" \"-\"\r\n","stream":"stdout","time":"2019-11-15T00:32:55.263751426Z"&#125;</span><br><span class="line">&#123;"log":"172.17.0.1 - - [15/Nov/2019:00:32:55 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"cur</span><br><span class="line">l/7.29.0\" \"-\"\r\n","stream":"stdout","time":"2019-11-15T00:32:55.758060729Z"&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="存储卷"><a href="#存储卷" class="headerlink" title="存储卷"></a>存储卷</h2><p>Docker常用的存储方式有两种<code>volumes</code>和<code>bind mount</code>,<code>volumes</code>存储在<code>/var/lib/docker/volumes</code>，<code>bind mount</code>可以是宿主机的任意位置。</p>
+<p>可以通过<code>docker volume ls</code>查看volume列表<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@dev volumes]# docker volume ls</span><br><span class="line">DRIVER              VOLUME NAME</span><br><span class="line">local               09e847e4927f1c7d71748aaa34b4d018680ad2446c1e2b6c81f88a9cd79d6d66</span><br><span class="line">local               jenkins</span><br></pre></td></tr></table></figure></p>
+<p>创建一个卷<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@dev volumes]# docker volume create nginx-volume</span><br><span class="line">nginx-volume</span><br></pre></td></tr></table></figure></p>
+<p>查看卷详情<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@dev volumes]# docker volume inspect nginx-volume</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        "CreatedAt": "2019-11-15T16:21:40+08:00",</span><br><span class="line">        "Driver": "local",</span><br><span class="line">        "Labels": &#123;&#125;,</span><br><span class="line">        "Mountpoint": "/var/lib/docker/volumes/nginx-volume/_data",</span><br><span class="line">        "Name": "nginx-volume",</span><br><span class="line">        "Options": &#123;&#125;,</span><br><span class="line">        "Scope": "local"</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>创建容器的时候使用这个卷，如果没有指定卷的话会默认创建一个卷。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@dev _data]# docker run -itd -p 8080:80  --name nginx --mount src=nginx-volume,dst=/usr/share/nginx/html nginx</span><br><span class="line">7499b405bca77aea5723a194f7956455cce8bb3aedea1b4158e233ad0db3bfa9</span><br></pre></td></tr></table></figure></p>
+<p>容器起来之后发现文件已经写出来到宿主机本地了<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@dev _data]# pwd</span><br><span class="line">/var/lib/docker/volumes/nginx-volume/_data</span><br><span class="line">[root@dev _data]# ls</span><br><span class="line">50x.html  index.html</span><br><span class="line">[root@dev _data]#</span><br></pre></td></tr></table></figure></p>
+<p>修改宿主机文件，然后通过访问容器内的nginx来证明文件是同步的<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@dev _data]# echo 111 &gt; test.html</span><br><span class="line">[root@dev _data]# ls</span><br><span class="line">50x.html  index.html  test.html</span><br><span class="line">[root@dev _data]# curl localhost:8080/test.html</span><br><span class="line">111</span><br><span class="line">[root@dev _data]#</span><br></pre></td></tr></table></figure></p>
+<p>进入容器确认文件是否存在<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@dev _data]# docker exec nginx more  /usr/share/nginx/html/test.html</span><br><span class="line">::::::::::::::</span><br><span class="line">/usr/share/nginx/html/test.html</span><br><span class="line">::::::::::::::</span><br><span class="line">111</span><br></pre></td></tr></table></figure></p>
+<p>删除一个卷使用<code>docker volume rm</code>即可</p>
+<p><code>bind mount</code> 需要指定类型,并且绑定宿主机的目录需要提前创建好<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@dev opt]# mkdir /opt/html</span><br><span class="line">[root@dev opt]# docker run -itd -p 8081:80  --name nginx-8081 --mount type=bind,src=/opt/html,dst=/usr/share/nginx/html nginx </span><br><span class="line">a2709612f0adee5a48501e12f1e1d65ffd62024223026b19dde4f2b560c2ace7</span><br></pre></td></tr></table></figure></p>
+<p>目前宿主机的目录是空的，容器内的目录也是空的，在宿主机内写文件，容器内目标目录也会有同样的文件,反之亦然。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@dev opt]# docker exec  nginx-8081 ls /usr/share/nginx/html </span><br><span class="line">[root@dev opt]# ls</span><br><span class="line">html</span><br><span class="line">[root@dev opt]# cd html/</span><br><span class="line">[root@dev html]# ls</span><br><span class="line">[root@dev html]# echo 111 &gt; index.html</span><br><span class="line">[root@dev html]# docker exec  nginx-8081 ls /usr/share/nginx/html </span><br><span class="line">index.html</span><br><span class="line">[root@dev html]# curl localhost:8081</span><br><span class="line">111</span><br><span class="line">[root@dev html]# docker exec nginx-8081 touch /usr/share/nginx/html/test.html</span><br><span class="line">[root@dev html]# docker exec  nginx-8081 ls /usr/share/nginx/html</span><br><span class="line">index.html</span><br><span class="line">test.html</span><br><span class="line">[root@dev html]# ls</span><br><span class="line">index.html  test.html</span><br></pre></td></tr></table></figure></p>
+<p>这个<code>bind mount</code>还可以简写,比如可以写为<code>docker run -itd -p 8081:80  --name nginx-8081 -v /opt/html:/usr/share/nginx/html nginx</code></p>
+<h2 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h2><p>Docker支持5种网络模式</p>
+<ol>
+<li><p><code>bridge</code>  默认网络，Docker安装的时候默认创建一个docker0网桥，默认创建的容器也是添加到这个网桥中。</p>
+</li>
+<li><p><code>host</code>   容器不会获得一个独立的network namespace，而是与宿主机共用一个。</p>
+</li>
+<li><p><code>none</code>  获取独立的network namespace，但不为容器进行任何网络配置。</p>
+</li>
+<li><p><code>container</code>  与指定的容器使用同一个network namespace，网卡配置也都是相同的。</p>
+</li>
+<li><p><code>custom</code>     自定义网桥，默认与bridge网络一样。</p>
+</li>
+</ol>
+<p>看一下docker的网络，并查看一下宿主机的docker0网桥<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">1974df6aac06        bridge              bridge              local</span><br><span class="line">8de4b3cf8127        host                host                local</span><br><span class="line">5473f4de6898        none                null                local</span><br><span class="line">[root@dev ~]# ip addr show docker0</span><br><span class="line">4: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default </span><br><span class="line">    link/ether 02:42:52:e3:d1:61 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::42:52ff:fee3:d161/64 scope link </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">[root@dev ~]#</span><br></pre></td></tr></table></figure></p>
+<p>docker0上有一对veth pair进行连接</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@dev ~]# docker exec -it busybox sh                                                  / # ip addr</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever                          </span><br><span class="line">17: eth0@if18: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue </span><br><span class="line">    link/ether 02:42:ac:11:00:04 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.4/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">/ # exit</span><br><span class="line">[root@dev ~]# ip addr show if18</span><br><span class="line">18: veth882df3c@if17: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default </span><br><span class="line">    link/ether d2:fb:14:6b:26:60 brd ff:ff:ff:ff:ff:ff link-netnsid 2</span><br><span class="line">    inet6 fe80::d0fb:14ff:fe6b:2660/64 scope link </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">[root@dev ~]# brctl show                                                                  bridge name     bridge id               STP enabled     interfaces</span><br><span class="line">docker0         8000.024252e3d161       no              veth882df3c</span><br><span class="line">                                                        vethc3a6616</span><br></pre></td></tr></table></figure>
+<p>可以看到容器内的eth0和宿主机docker0网桥上的veth882df3c是一对veth pair。</p>
+<h2 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h2><p>Docker镜像通常是使用Dockerfile来构建，可以清晰控制每一层镜像。下面是常用的指令</p>
+<ol>
+<li><code>FROM</code> 基于哪个基础镜像去构建，例如<code>FROM centos:7</code>。</li>
+<li><code>MAINTAINER</code> 镜像维护者名字或者邮箱，例如<code>MAINTAINER rzz1995@live.com</code></li>
+<li><code>RUN</code> <strong>构建镜像时运行</strong>的shell命令，例如<code>RUN yum install vim</code>或者<code>RUN [&quot;yum&quot;,&quot;install&quot;,&quot;vim&quot;]</code>。</li>
+<li><code>CMD</code> <strong>运行容器时执行</strong>的shell命令，例如<code>CMD /usr/sbin/sshd -D</code>或者<code>CMD [&quot;/usr/sbin/sshd&quot;,&quot;-D&quot;]</code>。</li>
+<li><code>EXPOSE</code> 暴露容器内部服务端口，例如<code>EXPOSE 443</code>。</li>
+<li><code>ENV</code> 设置容器内环境变量，例如<code>ENV MYSQL_ROOT_PASSWORD root</code></li>
+<li><code>ADD</code> 拷贝文件或者目录到镜像，如果是URL或者压缩包会自动下载或者解压，例如<code>ADD https://xxx.com/html.tar.gz /var/www/html</code>或者<code>ADD html.tar.gz /var/www/html</code>。</li>
+<li><code>COPY</code> 拷贝文件或者目录到镜像，例如<code>COPY ./start.sh /start.sh</code>。</li>
+<li><code>ENTRYPOINT</code> <strong>运行容器时执行</strong>执行的shell命令，例如<code>ENTRYPOINT [&quot;/bin/bash&quot;,&quot;-c&quot;,&quot;/start.sh&quot;]</code>或者<code>ENTRYPOINT /bin/bash -c &#39;./start.sh&#39;</code>。</li>
+<li><code>VOLUME</code> 指定容器挂载点到宿主机自动生成的目录或其他容器。例如<code>VOLUME [&quot;/var/lib/mysql&quot;]</code>。</li>
+<li><code>USER</code> 为<code>RUN</code>、<code>CMD</code>、<code>ENTRYPOINT</code>执行命令指定运行用户，例如<code>USER root</code>。</li>
+<li><code>WORKDIR</code> 为<code>RUN</code>,<code>CMD</code>,<code>ENTRYPOINT</code>,<code>COPY</code>,<code>ADD</code>设置工作目录，例如<code>WORKDIR /data</code>。</li>
+<li><code>HEALTHCHECK</code> 健康检查，例如<code>HEALTHCHECK --interval=5m --timeout=3s --retries=3 CMD curl -f http:localhost/ || exit 1</code>。</li>
+<li><code>ARG</code> 在构建镜像时指定一些参数，例如Dockerfile中有一行<code>ARG uer</code>，那build镜像的时候可以这样子传参<code>docker build --build-arg user=ruanzz Dockerfile .</code>。</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[root@dev demo]# docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">busybox             latest              020584afccce        6 weeks ago         1.22MB</span><br><span class="line">busybox             v1.0                020584afccce        6 weeks ago         1.22MB</span><br><span class="line">nginx               latest              540a289bab6c        7 weeks ago         126MB</span><br><span class="line">[root@dev demo]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r--. 1 root root 46 Dec 15 10:52 Dockerfile</span><br><span class="line">drwxr-xr-x. 2 root root 24 Dec 15 10:54 html</span><br><span class="line">[root@dev demo]# more html/index.html </span><br><span class="line">Hello Nginx</span><br><span class="line">[root@dev demo]# more Dockerfile </span><br><span class="line">FROM nginx</span><br><span class="line">COPY html/* /usr/share/nginx/html</span><br><span class="line"></span><br><span class="line">[root@dev demo]# docker build -t test-nginx:1.0 .</span><br><span class="line">Sending build context to Docker daemon  3.584kB</span><br><span class="line">Step 1/2 : FROM nginx</span><br><span class="line"><span class="meta"> ---&gt;</span><span class="bash"> 540a289bab6c</span></span><br><span class="line">Step 2/2 : COPY html/* /usr/share/nginx/html</span><br><span class="line"><span class="meta"> ---&gt;</span><span class="bash"> 7debe9edccb6</span></span><br><span class="line">Successfully built 7debe9edccb6</span><br><span class="line">Successfully tagged test-nginx:1.0</span><br><span class="line">[root@dev demo]# docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">test-nginx          1.0                 7debe9edccb6        6 seconds ago       126MB</span><br><span class="line">busybox             latest              020584afccce        6 weeks ago         1.22MB</span><br><span class="line">busybox             v1.0                020584afccce        6 weeks ago         1.22MB</span><br><span class="line">nginx               latest              540a289bab6c        7 weeks ago         126MB</span><br><span class="line">[root@dev demo]# docker run -it -d --name test-nginx -p 80:80  test-nginx:1.0</span><br><span class="line">05d5cbe48f90983b8470982ee0e81a8125d52129363779ad927ea46fc94afc60</span><br><span class="line">[root@dev demo]# curl localhost:80</span><br><span class="line">Hello Nginx</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/11/13/docker/">Docker</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Ryan</a></p>
+        <p><span>发布时间:</span>2019-11-13, 21:22:13</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/11/13/docker/" title="Docker">https://ruanzz.github.io/2019/11/13/docker/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://ruanzz.github.io/2019/11/13/docker/　　作者: Ryan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/12/15/first-business-trip/">
+                    第一次出差
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/11/10/kubeadm/">
+                    Kubeadm搭建K8s环境
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#镜像"><span class="toc-number">2.</span> <span class="toc-text">镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#容器"><span class="toc-number">3.</span> <span class="toc-text">容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#存储卷"><span class="toc-number">4.</span> <span class="toc-text">存储卷</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网络"><span class="toc-number">5.</span> <span class="toc-text">网络</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Dockerfile"><span class="toc-number">6.</span> <span class="toc-text">Dockerfile</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <!-- <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a> -->
+            <!-- <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a> -->
+            <!-- <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a> -->
+            <!-- <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a> -->
+            <!-- <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a> -->
+            <!-- <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a> -->
+            <!-- <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a> -->
+        </div>
+        <script>
+            //window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"Docker　| Ryan's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/12/15/first-business-trip/" title="上一篇: 第一次出差">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/11/10/kubeadm/" title="下一篇: Kubeadm搭建K8s环境">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/10/05/2020-mid/">双节</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/07/01/three-year-job-review/">三年</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/06/05/first-leader/">江湖再见</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/24/talk-promotion/">谈谈升职</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/27/mamba/">老大走好</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/13/linux-prof-important-cmd/">Linux常用命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/01/05/2019-review/">「迟到」的年终总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/15/first-business-trip/">第一次出差</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/13/docker/">Docker</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/10/kubeadm/">Kubeadm搭建K8s环境</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/10/03/one-year/">博客一周年了</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/07/13/why-depress/">为什么会抑郁？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/25/java-application-profile-optimize/">Java应用性能调优实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/06/14/codeman/">为什么当码农？</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/21/comment/">神级注释</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/13/sso/">单点登录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/07/kubernetes/">Kubernetes</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/01/rabbitmq/">RabbitMQ</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/31/restful/">RESTful API</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/24/office-skill/">职场技能</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/02/06/mysql-optimize/">MySQL优化思路</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/26/cloud-compute/">谈谈云</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/01/18/flag/">Flag</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/22/talk-nginx/">高性能Nginx(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/18/interview-summary/">Java后端面试题整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/12/15/talk-recent/">谈谈最近</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/03/hello-world/">Hello World</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2020 Ryan
+            </div>
+            <!-- <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div> -->
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+    <script src="/js/GithubRepoWidget.js"></script>
+
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+             github: ".github-widget a", 
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+            //  miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>c
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js“
+  </div>
+</body>
+</html>
